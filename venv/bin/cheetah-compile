@@ -1,0 +1,3 @@
+#!/vsu_tms_dev/venv/bin/python
+from Cheetah.CheetahWrapper import _cheetah_compile
+_cheetah_compile()

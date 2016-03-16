@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/vsu_tms_dev/venv/bin python
 import os
 import sys
 
