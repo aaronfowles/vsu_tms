@@ -31,7 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'vsu_tms_app',
+    'vsu_tms_app.apps.VsuTmsAppConfig',
     'django_nose',
     'django.contrib.admin',
     'django.contrib.auth',
