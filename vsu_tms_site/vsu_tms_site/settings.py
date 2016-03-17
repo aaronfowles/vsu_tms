@@ -126,6 +126,7 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+STATIC_ROOT = "/vsu_tms_dev/vsu_tms_site/static"
 # Testing
 
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
