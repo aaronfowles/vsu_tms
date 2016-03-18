@@ -2,4 +2,31 @@
 
 {% block content %}
 <h1>My Tasks</h1>
+<div class="section">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-12">
+            <h1>...insert status here...</h1>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-12">
+            <h1>My To-Do List</h1>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-12">
+            <ul class="list-group">
+              {% for tasks in mytasks_items %}
+                  <li class="list-group-item">{{ tasks.id }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
 {% endblock content %}
