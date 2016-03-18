@@ -9,7 +9,7 @@ class TaskList(models.Model):
     created_by_user_id = models.ForeignKey(User,on_delete=models.PROTECT)
 
     def __str__(self):
-        return self.date_valid_for
+        return str(self.date_valid_for)
     
 class LookupTaskFrequency(models.Model):
     frequency_or_day = models.CharField(max_length=64)
@@ -36,7 +36,7 @@ class Role(models.Model):
     group_id = models.ForeignKey(Group, on_delete=models.PROTECT)
     
     def __str__(self):
-        return role_desc
+        return self.role_desc
 
 class Task(models.Model):
     task_desc = models.CharField(max_length=128)
@@ -46,26 +46,29 @@ class Task(models.Model):
     task_urgency_id = models.ForeignKey(LookupTaskUrgency,on_delete=models.PROTECT)
 
     def __str__(self):
-        return task_desc
+        return self.task_desc
 
 class TaskListItem(models.Model):
     tasklist_id = models.ForeignKey(TaskList,on_delete=models.CASCADE)
     task_id = models.ForeignKey(Task,on_delete=models.PROTECT)
     complete = models.BooleanField(default=False)
-    notes = models.CharField(max_length=128)
+    notes = models.CharField(max_length=128, blank=True)
     time_due = models.DateTimeField()
 
     def __str__(self):
-        return self.task_id
+        return str(self.task_id)
 
 class StaffRole(models.Model):
     staff_id = models.ForeignKey(Staff, on_delete=models.PROTECT)
     role_id = models.ForeignKey(Role, on_delete=models.PROTECT)
 
     def __str__(self):
-        return self.staff_id + self.role_id
+        return str(self.staff_id) + str(self.role_id)
 
 class AuditLog(models.Model):
     user_id = models.ForeignKey(User, on_delete=models.PROTECT)
     timestamp = models.DateTimeField(auto_now=True)
     tasklist_id = models.ForeignKey(TaskListItem, on_delete=models.PROTECT)
+
+    def __str__(self):
+        return str(self.user_id) + str(self.timestamp) + str(self.tasklist_id)
