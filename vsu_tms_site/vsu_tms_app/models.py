@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 
 class TaskList(models.Model):
     date_valid_for = models.DateField()
@@ -33,6 +33,7 @@ class Staff(models.Model):
 
 class Role(models.Model):
     role_desc = models.CharField(max_length=64)
+    group_id = models.ForeignKey(Group, on_delete=models.PROTECT)
     
     def __str__(self):
         return role_desc
@@ -63,3 +64,8 @@ class StaffRole(models.Model):
 
     def __str__(self):
         return self.staff_id + self.role_id
+
+class AuditLog(models.Model):
+    user_id = models.ForeignKey(User, on_delete=models.PROTECT)
+    timestamp = models.DateTimeField(auto_now=True)
+    tasklist_id = models.ForeignKey(TaskListItem, on_delete=models.PROTECT)
