@@ -22,21 +22,22 @@ class LookupTaskUrgency(models.Model):
 
     def __str__(self):
         return self.urgency
+
+class Role(models.Model):
+    role_desc = models.CharField(max_length=64)
+    group_id = models.ForeignKey(Group, on_delete=models.PROTECT)
+
+    def __str__(self):
+        return self.role_desc
     
 class Staff(models.Model):
     user_id = models.ForeignKey(User,on_delete=models.PROTECT)
     name = models.CharField(max_length=64)
     email = models.EmailField(max_length=64)
+    role_id = models.ForeignKey(Role,on_delete=models.PROTECT)
 
     def __str__(self):
         return self.name
-
-class Role(models.Model):
-    role_desc = models.CharField(max_length=64)
-    group_id = models.ForeignKey(Group, on_delete=models.PROTECT)
-    
-    def __str__(self):
-        return self.role_desc
 
 class Task(models.Model):
     task_desc = models.CharField(max_length=128)
