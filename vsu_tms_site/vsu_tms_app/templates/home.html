@@ -20,11 +20,31 @@
         </div>
         <div class="row">
           <div class="col-md-12">
-            <ul class="list-group">
+            <table class="table">
+              <tr>
+                <td>Task List ID</td>
+                <td>Task List Item ID</td>
+                <td>Task ID</td>
+                <td>Task Description</td>
+                <td>Assigned To</td>
+                <td>Urgency</td>
+                <td>Time Due</td>
+                <td>Complete</td>
+                
+              </tr>
               {% for tasklist_item in all_tasklist_items %}
-                  <li class="list-group-item">{{ tasklist_item.id }}</li>
+                  <tr>
+                    <td>{{ tasklist_item.tasklist_id }}</td>
+                    <td>{{ tasklist_item.tasklistitem_id }}</td>
+                    <td>{{ tasklist_item.task_id }}</td>
+                    <td>{{ tasklist_item.task_desc }}</td>
+                    <td>{{ tasklist_item.assigned_role }}</td>
+                    <td>{{ tasklist_item.urgency }}</td>
+                    <td>{{ tasklist_item.time_due }}</td>
+                    <td>Done glyph</td>
+                  </tr>
               {% endfor %}
-            </ul>
+            </table>
           </div>
         </div>
       </div>

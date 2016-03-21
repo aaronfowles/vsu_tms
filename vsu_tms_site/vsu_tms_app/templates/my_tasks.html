@@ -20,11 +20,20 @@
         </div>
         <div class="row">
           <div class="col-md-12">
-            <ul class="list-group">
+            <table class="table">
+              <tr>
+                <td>Task ID</td>
+                <td>Task List ID</td>
+                <td>Task List Item ID</td>
+                <td>Task Description</td>
+                <td>Urgency</td>
+                <td>Time Due</td>
+                <td>Complete</td>
+              </tr>
               {% for tasks in my_tasks_items %}
-                  <li class="list-group-item">{{ tasks.task_id }}</li>
+                  
               {% endfor %}
-            </ul>
+            </table>
           </div>
         </div>
       </div>
