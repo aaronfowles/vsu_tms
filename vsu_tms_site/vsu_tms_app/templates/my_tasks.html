@@ -31,7 +31,15 @@
                 <td>Complete</td>
               </tr>
               {% for tasks in my_tasks_items %}
-                  
+                  <tr>
+                    <td>{{ tasks.task_id }}</td>
+                    <td>{{ tasks.tasklist_id }}</td>
+                    <td>{{ tasks.tasklistitem_id }}</td>
+                    <td>{{ tasks.task_desc }}</td>
+                    <td>{{ tasks.urgency }}</td>
+                    <td>{{ tasks.time_due }}</td>
+                    <td>Complete glyph</td>
+                  </tr>
               {% endfor %}
             </table>
           </div>
