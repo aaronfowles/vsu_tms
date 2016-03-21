@@ -1,8 +1,9 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.db import connection
+from django.http import HttpResponse
 
-from .models import TaskListItem, Task, Staff, Role, LookupTaskUrgency
+from .models import TaskListItem, Task, Staff, Role, LookupTaskUrgency, AuditLog
 
 
 # Landing page
@@ -18,6 +19,7 @@ def home(req):
     for tasklist_item in all_incomplete:
         temp_dict = {}
         temp_dict['tasklistitem_id'] = tasklist_item.id
+        temp_dict['tasklist_id'] = tasklist_item.tasklist_id.id
         temp_dict['time_due'] = tasklist_item.time_due
         temp_dict['task_id'] = tasklist_item.task_id.id
         task_obj = Task.objects.get(id=tasklist_item.task_id.id)
@@ -58,3 +60,17 @@ def my_tasks(req):
 @login_required()
 def daily_management(req):
     return render(req,'daily_management.html')
+
+
+# Submit task completion
+@login_required()
+def task_completed(req):
+    context = {}
+    tasklistitem_id = req.POST['tasklistitem_id']
+    user_id = req.user
+    tasklistitem = TaskListItem.objects.get(id=tasklistitem_id)
+    tasklistitem.complete = True
+    log = AuditLog(user_id=user_id, tasklist_id=tasklistitem)
+    tasklistitem.save()
+    log.save()
+    return HttpResponse("OK")

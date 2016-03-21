@@ -3,7 +3,7 @@
 {% block content %}
 <h1>Home</h1>
 <div class="section">
-      <div class="container">
+      <div ng-app="" class="container">
         <div class="row">
           <div class="col-md-12">
             <h1>...insert status here...</h1>
@@ -29,11 +29,10 @@
                 <td>Assigned To</td>
                 <td>Urgency</td>
                 <td>Time Due</td>
-                <td>Complete</td>
-                
+                <td>Complete</td>                
               </tr>
               {% for tasklist_item in all_tasklist_items %}
-                  <tr>
+                  <tr id="{{ tasklist_item.tasklistitem_id }}">
                     <td>{{ tasklist_item.tasklist_id }}</td>
                     <td>{{ tasklist_item.tasklistitem_id }}</td>
                     <td>{{ tasklist_item.task_id }}</td>
@@ -41,7 +40,7 @@
                     <td>{{ tasklist_item.assigned_role }}</td>
                     <td>{{ tasklist_item.urgency }}</td>
                     <td>{{ tasklist_item.time_due }}</td>
-                    <td>Done glyph</td>
+                    <td><button class="btn-success task-checkbox"><span class="glyphicon glyphicon-ok"></span></button></td>
                   </tr>
               {% endfor %}
             </table>

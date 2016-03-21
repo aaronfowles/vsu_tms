@@ -9,4 +9,5 @@ urlpatterns = [
     url(r'^home/', views.home, name='home'),
     url(r'^my_tasks/', views.my_tasks, name='my_tasks'),
     url(r'^daily_management/', views.daily_management, name='daily_management'),
+    url(r'task_completed/', views.task_completed, name='task_completed'),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
