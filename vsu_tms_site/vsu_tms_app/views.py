@@ -118,14 +118,33 @@ def create_task_list(req):
     for task in tasks:
         if (set_anually and task.task_frequency_id == 'annually'):
             to_commit.append(TaskListItem(tasklist_id=new_list,task_id=task.id,time_due=date(day.year,12,31)))
-            break
+            continue
         if (set_monthly and task.task_frequency_id == 'monthly'):
             to_commit.append(TaskListItem(tasklist_id=new_list,task_id=task.id,time_due=date(day.year,(day.month+1),day.day)))
-            break
+            continue
         if (set_weekly and task.task_frequency_id == 'weekly'):
             to_commit.append(TaskListItem(tasklist_id=new_list,task_id=task.id,time_due=date(day.year,day.month,(day.day+7))))
-            break
+            continue
         if (task.task_frequency_id == 'monday' and day.isoweekday() == 1):
             to_commit.append(TaskListItem(tasklist_id=new_list,task_id=task.id,time_due=date(day.year,day.month,day.day,17)))
-            break        
-                   
+            continue 
+        if (task.task_frequency_id == 'tuesday' and day.isoweekday() == 2):
+            to_commit.append(TaskListItem(tasklist_id=new_list,task_id=task.id,time_due=date(day.year,day.month,day.day,17)))
+            continue
+        if (task.task_frequency_id == 'wednesday' and day.isoweekday() == 3):
+            to_commit.append(TaskListItem(tasklist_id=new_list,task_id=task.id,time_due=date(day.year,day.month,day.day,17)))
+            continue
+        if (task.task_frequency_id == 'thursday' and day.isoweekday() == 4):
+            to_commit.append(TaskListItem(tasklist_id=new_list,task_id=task.id,time_due=date(day.year,day.month,day.day,17)))
+            continue
+        if (task.task_frequency_id == 'friday' and day.isoweekday() == 5):
+            to_commit.append(TaskListItem(tasklist_id=new_list,task_id=task.id,time_due=date(day.year,day.month,day.day,17)))
+            continue
+        if (task.task_frequency_id == 'hourly'):
+            for hour in range(8,18):
+                to_commit.append(TaskListItem(tasklist_id=new_list,task_id=task.id,time_due=date(day.year,day.month,day.day,hour)))
+            continue
+    for i in to_commit:
+        i.save()
+
+    return HttpResponse("OK")
