@@ -33,7 +33,7 @@
               </tr>
               </thead>
               {% for tasks in my_tasks_items %}
-                  <tr id="{{ tasklist_item.tasklistitem_id }}">
+                  <tr id="{{ tasks.tasklistitem_id }}">
                     <td>{{ tasks.task_id }}</td>
                     <td>{{ tasks.tasklist_id }}</td>
                     <td>{{ tasks.tasklistitem_id }}</td>

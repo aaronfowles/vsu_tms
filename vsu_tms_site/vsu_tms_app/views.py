@@ -42,17 +42,19 @@ def my_tasks(req):
 
     all_incomplete = TaskListItem.objects.filter(complete=False).select_related()
     for tasklist_item in all_incomplete:
-        temp_dict = {}
-        temp_dict['tasklistitem_id'] = tasklist_item.id
-        temp_dict['tasklist_id'] = tasklist_item.tasklist_id.id
-        temp_dict['time_due'] = tasklist_item.time_due
-        temp_dict['task_id'] = tasklist_item.task_id.id
         task_obj = Task.objects.get(id=tasklist_item.task_id.id)
-        temp_dict['task_desc'] = task_obj.task_desc
-        temp_dict['assigned_role'] = task_obj.assigned_role_id
-        urgency = LookupTaskUrgency.objects.get(id=task_obj.task_urgency_id.id)
-        temp_dict['urgency'] = urgency
-        context['my_tasks_items'].append(dict(temp_dict))
+        if (task_obj.assigned_role_id.id == role.id):
+            temp_dict = {}
+            temp_dict['tasklistitem_id'] = tasklist_item.id
+            temp_dict['tasklist_id'] = tasklist_item.tasklist_id.id
+            temp_dict['time_due'] = tasklist_item.time_due
+            temp_dict['task_id'] = tasklist_item.task_id.id
+            task_obj = Task.objects.get(id=tasklist_item.task_id.id)
+            temp_dict['task_desc'] = task_obj.task_desc
+            temp_dict['assigned_role'] = task_obj.assigned_role_id
+            urgency = LookupTaskUrgency.objects.get(id=task_obj.task_urgency_id.id)
+            temp_dict['urgency'] = urgency
+            context['my_tasks_items'].append(dict(temp_dict))
 
     return render(req,'my_tasks.html', context)
 
