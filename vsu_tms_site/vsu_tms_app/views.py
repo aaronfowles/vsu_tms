@@ -1,12 +1,13 @@
 from django.shortcuts import render
 from django.contrib.auth import authenticate, login
+from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.db import connection
 from django.http import HttpResponse
 
 from datetime import date, datetime
 
-from .models import TaskListItem, Task, Staff, Role, LookupTaskUrgency, AuditLog
+from .models import TaskListItem, Task, Staff, Role, LookupTaskUrgency, AuditLog, TaskList
 
 # Login page
 def user_login(req):
@@ -107,44 +108,48 @@ def create_task_list(req):
     context = {}
     username = User.objects.get(username='dev')
     if(req.user is not None):
-        username = req.user.id
+        username = req.user
     day = date.today()
-    new_list = TaskList(date_valid_for=day,created_by_user_id=username)
+    if (TaskList.objects.filter(date_valid_for=day)):
+        return HttpResponse("Denied")
+    new_list = TaskList.objects.create(date_valid_for=day,created_by_user_id=username)
     tasks = Task.objects.all()
     set_weekly = True if day.isoweekday()==1 else False
     set_monthly = True if day.day==1 else False
     set_annually = True if set_monthly and day.month==1 else False 
     to_commit = []
     for task in tasks:
-        if (set_anually and task.task_frequency_id == 'annually'):
-            to_commit.append(TaskListItem(tasklist_id=new_list,task_id=task.id,time_due=date(day.year,12,31)))
+        if (set_annually and task.task_frequency_id == 'annually'):
+            TaskListItem.objects.create(tasklist_id=new_list,task_id=task,time_due=datetime(day.year,12,31))
             continue
         if (set_monthly and task.task_frequency_id == 'monthly'):
-            to_commit.append(TaskListItem(tasklist_id=new_list,task_id=task.id,time_due=date(day.year,(day.month+1),day.day)))
+            TaskListItem.objects.create(tasklist_id=new_list,task_id=task,time_due=datetime(day.year,(day.month+1),day.day))
             continue
         if (set_weekly and task.task_frequency_id == 'weekly'):
-            to_commit.append(TaskListItem(tasklist_id=new_list,task_id=task.id,time_due=date(day.year,day.month,(day.day+7))))
+            TaskListItem.objects.create(tasklist_id=new_list,task_id=task,time_due=datetime(day.year,day.month,(day.day+7)))
             continue
         if (task.task_frequency_id == 'monday' and day.isoweekday() == 1):
-            to_commit.append(TaskListItem(tasklist_id=new_list,task_id=task.id,time_due=date(day.year,day.month,day.day,17)))
+            TaskListItem.objects.create(tasklist_id=new_list,task_id=task,time_due=datetime(day.year,day.month,day.day,17))
             continue 
         if (task.task_frequency_id == 'tuesday' and day.isoweekday() == 2):
-            to_commit.append(TaskListItem(tasklist_id=new_list,task_id=task.id,time_due=date(day.year,day.month,day.day,17)))
+            TaskListItem.objects.create(tasklist_id=new_list,task_id=task,time_due=datetime(day.year,day.month,day.day,17))
             continue
         if (task.task_frequency_id == 'wednesday' and day.isoweekday() == 3):
-            to_commit.append(TaskListItem(tasklist_id=new_list,task_id=task.id,time_due=date(day.year,day.month,day.day,17)))
+            TaskListItem.objects.create(tasklist_id=new_list,task_id=task,time_due=datetime(day.year,day.month,day.day,17))
             continue
         if (task.task_frequency_id == 'thursday' and day.isoweekday() == 4):
-            to_commit.append(TaskListItem(tasklist_id=new_list,task_id=task.id,time_due=date(day.year,day.month,day.day,17)))
+            TaskListItem.objects.create(tasklist_id=new_list,task_id=task,time_due=datetime(day.year,day.month,day.day,17))
             continue
         if (task.task_frequency_id == 'friday' and day.isoweekday() == 5):
-            to_commit.append(TaskListItem(tasklist_id=new_list,task_id=task.id,time_due=date(day.year,day.month,day.day,17)))
+            TaskListItem.objects.create(tasklist_id=new_list,task_id=task,time_due=datetime(day.year,day.month,day.day,17))
             continue
-        if (task.task_frequency_id == 'hourly'):
+        if (task.task_frequency_id == 'daily' and day.isoweekday() not in [6,7]):
+            TaskListItem.objects.create(tasklist_id=new_list,task_id=task,time_due=datetime(day.year,day.month,day.day,17))
+            continue
+        if (str(task.task_frequency_id) == 'hourly' and day.isoweekday() not in [6,7]):
+            to_commit.append('hourly')
             for hour in range(8,18):
-                to_commit.append(TaskListItem(tasklist_id=new_list,task_id=task.id,time_due=date(day.year,day.month,day.day,hour)))
+                TaskListItem.objects.create(tasklist_id=new_list,task_id=task,time_due=datetime(day.year,day.month,day.day,hour))
             continue
-    for i in to_commit:
-        i.save()
 
-    return HttpResponse("OK")
+    return HttpResponse(str(','.join(to_commit)))
