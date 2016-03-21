@@ -1,9 +1,33 @@
 from django.shortcuts import render
+from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.db import connection
 from django.http import HttpResponse
 
+from datetime import date, datetime
+
 from .models import TaskListItem, Task, Staff, Role, LookupTaskUrgency, AuditLog
+
+# Login page
+def user_login(req):
+    return render(req,"login.html")
+
+# Verify login  page
+def verify(req):
+    context = {}
+    username = req.POST['username']
+    password = req.POST['password']
+    user = authenticate(username=username, password=password)
+    context['response'] = HttpResponse()
+    if user is not None:
+        if user.is_active:
+            login(req,user)
+            return render(req, "index.html", context)
+        else:
+            return render(req,"login.html", context)
+    else:
+        context['response'].content = "Credentials do not match existing user"
+    return render(req,"login.html", context)
 
 
 # Landing page
@@ -76,3 +100,32 @@ def task_completed(req):
     tasklistitem.save()
     log.save()
     return HttpResponse("OK")
+
+# Create TaskList
+@login_required()
+def create_task_list(req):
+    context = {}
+    username = User.objects.get(username='dev')
+    if(req.user is not None):
+        username = req.user.id
+    day = date.today()
+    new_list = TaskList(date_valid_for=day,created_by_user_id=username)
+    tasks = Task.objects.all()
+    set_weekly = True if day.isoweekday()==1 else False
+    set_monthly = True if day.day==1 else False
+    set_annually = True if set_monthly and day.month==1 else False 
+    to_commit = []
+    for task in tasks:
+        if (set_anually and task.task_frequency_id == 'annually'):
+            to_commit.append(TaskListItem(tasklist_id=new_list,task_id=task.id,time_due=date(day.year,12,31)))
+            break
+        if (set_monthly and task.task_frequency_id == 'monthly'):
+            to_commit.append(TaskListItem(tasklist_id=new_list,task_id=task.id,time_due=date(day.year,(day.month+1),day.day)))
+            break
+        if (set_weekly and task.task_frequency_id == 'weekly'):
+            to_commit.append(TaskListItem(tasklist_id=new_list,task_id=task.id,time_due=date(day.year,day.month,(day.day+7))))
+            break
+        if (task.task_frequency_id == 'monday' and day.isoweekday() == 1):
+            to_commit.append(TaskListItem(tasklist_id=new_list,task_id=task.id,time_due=date(day.year,day.month,day.day,17)))
+            break        
+                   
