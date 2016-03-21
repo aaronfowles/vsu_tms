@@ -21,24 +21,26 @@
         <div class="row">
           <div class="col-md-12">
             <table class="table">
+              <thead>
               <tr>
-                <td>Task ID</td>
-                <td>Task List ID</td>
-                <td>Task List Item ID</td>
-                <td>Task Description</td>
-                <td>Urgency</td>
-                <td>Time Due</td>
-                <td>Complete</td>
+                <th>Task ID</th>
+                <th>>Task List ID</th>
+                <th>Task List Item ID</th>
+                <th>Task Description</th>
+                <th>Urgency</th>
+                <th>Time Due</th>
+                <th>Complete</th>
               </tr>
+              </thead>
               {% for tasks in my_tasks_items %}
-                  <tr>
+                  <tr id="{{ tasklist_item.tasklistitem_id }}">
                     <td>{{ tasks.task_id }}</td>
                     <td>{{ tasks.tasklist_id }}</td>
                     <td>{{ tasks.tasklistitem_id }}</td>
                     <td>{{ tasks.task_desc }}</td>
                     <td>{{ tasks.urgency }}</td>
                     <td>{{ tasks.time_due }}</td>
-                    <td>Complete glyph</td>
+                    <td><button class="btn-success task-checkbox"><span class="glyphicon glyphicon-ok"></span></button></td>
                   </tr>
               {% endfor %}
             </table>

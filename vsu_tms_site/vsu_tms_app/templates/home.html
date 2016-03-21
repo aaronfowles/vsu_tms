@@ -21,16 +21,18 @@
         <div class="row">
           <div class="col-md-12">
             <table class="table">
+              <thead>
               <tr>
-                <td>Task List ID</td>
-                <td>Task List Item ID</td>
-                <td>Task ID</td>
-                <td>Task Description</td>
-                <td>Assigned To</td>
-                <td>Urgency</td>
-                <td>Time Due</td>
-                <td>Complete</td>                
+                <th>Task List ID</th>
+                <th>Task List Item ID</th>
+                <th>Task ID</th>
+                <th>Task Description</th>
+                <th>Assigned To</th>
+                <th>Urgency</th>
+                <th>Time Due</th>
+                <th>Complete</th>                
               </tr>
+              </thead>
               {% for tasklist_item in all_tasklist_items %}
                   <tr id="{{ tasklist_item.tasklistitem_id }}">
                     <td>{{ tasklist_item.tasklist_id }}</td>
