@@ -66,7 +66,20 @@
     </nav>
         <div class="container-fluid">
         <h1 id="page-title">{{ title }}</h1>
-        <div id="status">Insert Status here</div>
+        <div class="row">
+          <div class="col-md-12">
+            <div id="status" class="alert alert-dismissable alert-success">
+              <strong>Overall Status</strong>You successfully read this important alert message.</div>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+          <div class="col-md-12">
+            <div id="feedback" class="alert alert-dismissable alert-success">
+              <strong>Interaction status</strong>You successfully read this important alert message.</div>
+          </div>
+        </div>
+      </div>
         {% block content %}
         {% endblock content %}
         </div>
