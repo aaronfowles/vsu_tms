@@ -87,6 +87,9 @@ def my_tasks(req):
     role = Staff.objects.get(id=staff).role_id
     
     context['my_tasks_items'] = []
+    context['status'] = {}
+    context['status']['class'] = 'alert-success'
+    context['status']['message'] = 'There are no tasks to complete.'
 
     all_incomplete = TaskListItem.objects.filter(complete=False).select_related()
     for tasklist_item in all_incomplete:
@@ -109,7 +112,13 @@ def my_tasks(req):
             else:
                 tasklist = TaskList.objects.get(id=tasklist_item.tasklist_id.id)
                 temp_dict['time_active'] = tasklist.date_valid_for
+            if (tasklist_item.time_due.astimezone(timezone.utc).replace(tzinfo=None) >= datetime.now()):
+                context['status']['class'] = 'alert-danger'
+                context['status']['message'] = 'There are outstanding tasks to be completed.'
             context['my_tasks_items'].append(dict(temp_dict))
+    if ((context['all_tasklist_items'] is not None) and (context['status']['class'] is not 'alert-danger')):
+        context['status']['class'] = 'alert-warning'
+        context['status']['message'] = 'There are pending tasks to complete'
     context['title'] = 'My Tasks'
     return render(req,'my_tasks.html', context)
 
