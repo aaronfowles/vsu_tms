@@ -84,6 +84,7 @@ def my_tasks(req):
         task_obj = Task.objects.get(id=tasklist_item.task_id.id)
         if (task_obj.assigned_role_id.id == role.id):
             temp_dict = {}
+            temp_dict['time_now'] = datetime.now()
             temp_dict['tasklistitem_id'] = tasklist_item.id
             temp_dict['tasklist_id'] = tasklist_item.tasklist_id.id
             temp_dict['time_due'] = tasklist_item.time_due
@@ -93,6 +94,12 @@ def my_tasks(req):
             temp_dict['assigned_role'] = task_obj.assigned_role_id
             urgency = LookupTaskUrgency.objects.get(id=task_obj.task_urgency_id.id)
             temp_dict['urgency'] = urgency
+            if (str(task_obj.task_frequency_id) == 'hourly'):
+                dt = tasklist_item.time_due
+                temp_dict['time_active'] = datetime(dt.year,dt.month,dt.day,(dt.hour-1))
+            else:
+                tasklist = TaskList.objects.get(id=tasklist_item.tasklist_id.id)
+                temp_dict['time_active'] = tasklist.date_valid_for
             context['my_tasks_items'].append(dict(temp_dict))
     context['title'] = 'My Tasks'
     return render(req,'my_tasks.html', context)
