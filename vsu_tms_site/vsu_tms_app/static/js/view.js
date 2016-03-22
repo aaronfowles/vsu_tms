@@ -34,6 +34,6 @@ function clickedComplete(id) {
 
 // Request updates from database
 
-
+// Function to hide hourly tasks which aren't due yet
 
 

@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.db import connection
 from django.http import HttpResponse
 from django.utils import timezone
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 
 from .models import TaskListItem, Task, Staff, Role, LookupTaskUrgency, AuditLog, TaskList
 
@@ -25,16 +25,17 @@ def verify(req):
     if user is not None:
         if user.is_active:
             login(req,user)
+            context['title'] = 'Welcome'
             return render(req, "index.html", context)
         else:
             return render(req,"login.html", context)
     else:
         context['response'].content = "Credentials do not match existing user"
-    context['title'] = 'Verify'
     return render(req,"login.html", context)
 
 
 # Landing page
+@login_required()
 def index(req):
     context = {}
     context['title'] = 'Welcome'
@@ -48,6 +49,7 @@ def home(req):
     context['all_tasklist_items'] = []
     for tasklist_item in all_incomplete:
         temp_dict = {}
+        temp_dict['time_now'] = datetime.now()
         temp_dict['tasklistitem_id'] = tasklist_item.id
         temp_dict['tasklist_id'] = tasklist_item.tasklist_id.id
         temp_dict['time_due'] = tasklist_item.time_due
@@ -56,6 +58,12 @@ def home(req):
         temp_dict['task_desc'] = task_obj.task_desc
         temp_dict['assigned_role'] = task_obj.assigned_role_id
         urgency = LookupTaskUrgency.objects.get(id=task_obj.task_urgency_id.id)
+        if (str(task_obj.task_frequency_id) == 'hourly'):
+            dt = tasklist_item.time_due
+            temp_dict['time_active'] = datetime(dt.year,dt.month,dt.day,(dt.hour-1))
+        else:
+            tasklist = TaskList.objects.get(id=tasklist_item.tasklist_id.id)
+            temp_dict['time_active'] = tasklist.date_valid_for
         temp_dict['urgency'] = urgency
         context['all_tasklist_items'].append(dict(temp_dict))
     context['title'] = 'Home'
@@ -116,7 +124,7 @@ def daily_management(req):
 @login_required()
 def user_logout(req):
     logout(req)
-    return redirect('index')
+    return redirect('/')
 
 # Submit task completion
 @login_required()
@@ -182,3 +190,10 @@ def create_task_list(req):
             continue
 
     return HttpResponse(str(','.join(to_commit)))
+
+
+# Landing page
+def landing(req):
+    context = {}
+    context['title'] = 'Info'
+    return render(req,'landing.html',context)

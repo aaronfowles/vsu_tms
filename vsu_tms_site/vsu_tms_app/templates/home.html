@@ -20,10 +20,12 @@
                 <th>Assigned To</th>
                 <th>Urgency</th>
                 <th>Time Due</th>
+                <th>Time Active<th>
                 <th>Complete</th>                
               </tr>
               </thead>
-              {% for tasklist_item in all_tasklist_items %}
+              {% for tasklist_item in all_tasklist_items|dictsort:"time_due" %}
+                  {% if tasklist_item.time_active <= tasklist_item.time_now %}
                   <tr id="{{ tasklist_item.tasklistitem_id }}">
                     <td>{{ tasklist_item.tasklist_id }}</td>
                     <td>{{ tasklist_item.tasklistitem_id }}</td>
@@ -32,8 +34,10 @@
                     <td>{{ tasklist_item.assigned_role }}</td>
                     <td>{{ tasklist_item.urgency }}</td>
                     <td>{{ tasklist_item.time_due }}</td>
+                    <td>{{ tasklist_item.time_active }}<td>
                     <td><button class="btn-success task-checkbox"><span class="glyphicon glyphicon-ok"></span></button></td>
                   </tr>
+                  {% endif %}
               {% endfor %}
             </table>
           </div>

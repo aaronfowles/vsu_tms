@@ -20,9 +20,12 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 from . import settings
 
+import vsu_tms_app
+
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^app/', include('vsu_tms_app.urls')),
+    url(r'^$', vsu_tms_app.views.landing, name='landing' ),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 urlpatterns += staticfiles_urlpatterns()
