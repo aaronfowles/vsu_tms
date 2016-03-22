@@ -1,77 +1,27 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Daily Management</h1>
 <div class="section">
       <div class="container">
         <div class="row">
           <div class="col-md-12">
-            <h1 class="text-center">Gallery</h1>
+            <h1 class="text-center">Teams</h1>
           </div>
         </div>
         <div class="row">
+          {% for k, v in items.iteritems %}
           <div class="col-md-4">
             <div class="panel panel-primary">
               <div class="panel-heading">
-                <h3 class="panel-title">Panel title</h3>
+                <h3 class="panel-title">{{ k }} </h3>
               </div>
               <div class="panel-body">
-                <p>Panel content</p>
+                <p>Pending: {{ v.pending }}</p>
+                <p>Outstanding: {{ v.outstanding }}</p>
               </div>
             </div>
           </div>
-          <div class="col-md-4">
-            <div class="panel panel-primary">
-              <div class="panel-heading">
-                <h3 class="panel-title">Panel title</h3>
-              </div>
-              <div class="panel-body">
-                <p>Panel content</p>
-              </div>
-            </div>
-          </div>
-          <div class="col-md-4">
-            <div class="panel panel-primary">
-              <div class="panel-heading">
-                <h3 class="panel-title">Panel title</h3>
-              </div>
-              <div class="panel-body">
-                <p>Panel content</p>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-md-4">
-            <div class="panel panel-primary">
-              <div class="panel-heading">
-                <h3 class="panel-title">Panel title</h3>
-              </div>
-              <div class="panel-body">
-                <p>Panel content</p>
-              </div>
-            </div>
-          </div>
-          <div class="col-md-4">
-            <div class="panel panel-primary">
-              <div class="panel-heading">
-                <h3 class="panel-title">Panel title</h3>
-              </div>
-              <div class="panel-body">
-                <p>Panel content</p>
-              </div>
-            </div>
-          </div>
-          <div class="col-md-4">
-            <div class="panel panel-primary">
-              <div class="panel-heading">
-                <h3 class="panel-title">Panel title</h3>
-              </div>
-              <div class="panel-body">
-                <p>Panel content</p>
-              </div>
-            </div>
-          </div>
+          {% endfor %}
         </div>
       </div>
     </div>

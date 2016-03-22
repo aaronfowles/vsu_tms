@@ -45,18 +45,18 @@
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav navbar-left">
                     <li>
-                        <a href="#">Home</a>
+                        <a href="{% url 'home' %}">Home</a>
                     </li>
                     <li>
-                        <a href="#">My Tasks</a>
+                        <a href="{% url 'my_tasks' %}">My Tasks</a>
                     </li>
                     <li>
-                        <a href="#">Daily Management</a>
+                        <a href="{% url 'daily_management' %}">Daily Management</a>
                     </li>
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
                     <li>
-                        <a href="#">Logout</a>
+                        <a href="{% url 'user_logout' %}">Logout</a>
                     </li>
                 </ul>
             </div>
@@ -64,9 +64,12 @@
         </div>
         <!-- /.container -->
     </nav>
-
+        <div class="container-fluid">
+        <h1 id="page-title">{{ title }}</h1>
+        <div id="status">Insert Status here</div>
         {% block content %}
         {% endblock content %}
+        </div>
         <hr>
 
         <!-- Footer -->

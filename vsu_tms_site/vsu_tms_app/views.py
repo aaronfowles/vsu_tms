@@ -1,17 +1,19 @@
-from django.shortcuts import render
-from django.contrib.auth import authenticate, login
+from django.shortcuts import render, redirect
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.db import connection
 from django.http import HttpResponse
-
+from django.utils import timezone
 from datetime import date, datetime
 
 from .models import TaskListItem, Task, Staff, Role, LookupTaskUrgency, AuditLog, TaskList
 
 # Login page
 def user_login(req):
-    return render(req,"login.html")
+    context = {}
+    context['title'] = 'Login'
+    return render(req,"login.html",context)
 
 # Verify login  page
 def verify(req):
@@ -28,12 +30,15 @@ def verify(req):
             return render(req,"login.html", context)
     else:
         context['response'].content = "Credentials do not match existing user"
+    context['title'] = 'Verify'
     return render(req,"login.html", context)
 
 
 # Landing page
 def index(req):
-    return render(req,'index.html')
+    context = {}
+    context['title'] = 'Welcome'
+    return render(req,'index.html',context)
 
 # Home page
 @login_required()
@@ -53,6 +58,7 @@ def home(req):
         urgency = LookupTaskUrgency.objects.get(id=task_obj.task_urgency_id.id)
         temp_dict['urgency'] = urgency
         context['all_tasklist_items'].append(dict(temp_dict))
+    context['title'] = 'Home'
     return render(req, 'home.html', context)
 
 # My Tasks page
@@ -80,14 +86,37 @@ def my_tasks(req):
             urgency = LookupTaskUrgency.objects.get(id=task_obj.task_urgency_id.id)
             temp_dict['urgency'] = urgency
             context['my_tasks_items'].append(dict(temp_dict))
-
+    context['title'] = 'My Tasks'
     return render(req,'my_tasks.html', context)
 
 # Daily Management Page
 @login_required()
 def daily_management(req):
-    return render(req,'daily_management.html')
+    context = {}
+    all_incomplete = TaskListItem.objects.filter(complete=False)
+    all_incomplete_task_ids = [task.task_id.id for task in all_incomplete]
+    all_roles = Role.objects.all()
+    context['items'] = {}
+    c = context['items']
+    for role in all_roles:
+        c[str(role)] = {}
+        c[str(role)]['pending'] = 0
+        c[str(role)]['outstanding'] = 0
+        all_incomplete_tasks = Task.objects.filter(id__in=all_incomplete_task_ids)
+        for task in all_incomplete:
+            if (Task.objects.get(id=task.task_id.id).assigned_role_id.id == role.id):
+                if (task.time_due.astimezone(timezone.utc).replace(tzinfo=None) < datetime.now()):
+                    c[str(role)]['outstanding'] += 1
+                else:
+                    c[str(role)]['pending'] += 1
+    context['title'] = 'Daily Management'
+    return render(req,'daily_management.html',context)
 
+# Logout
+@login_required()
+def user_logout(req):
+    logout(req)
+    return redirect('index')
 
 # Submit task completion
 @login_required()
@@ -153,6 +182,3 @@ def create_task_list(req):
             continue
 
     return HttpResponse(str(','.join(to_commit)))
-
-def test_script():
-    return 'test_script called'

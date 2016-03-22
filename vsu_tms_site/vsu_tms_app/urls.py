@@ -13,4 +13,5 @@ urlpatterns = [
     url(r'^daily_management/', views.daily_management, name='daily_management'),
     url(r'^task_completed/', views.task_completed, name='task_completed'),
     url(r'^create_task_list',views.create_task_list, name='create_task_list'),
+    url(r'^logout', views.user_logout, name='user_logout'),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

@@ -20,6 +20,7 @@ function clickedComplete(id) {
         success: function() {
             var id_string = "#" + id.toString();
             $(id_string).empty();
+            // Look into bootstrap collapse functionality
             $(id_string).animate({height: 0, opacity:0},400);
         }
     });
