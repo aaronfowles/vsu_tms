@@ -153,3 +153,6 @@ def create_task_list(req):
             continue
 
     return HttpResponse(str(','.join(to_commit)))
+
+def test_script():
+    return 'test_script called'
