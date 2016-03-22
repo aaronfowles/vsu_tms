@@ -68,15 +68,18 @@
         <h1 id="page-title">{{ title }}</h1>
           <div class="row">
             <div class="col-md-12">
-              <div id="status" class="alert alert-dismissable alert-success">
-                <strong>Overall Status</strong>You successfully read this important alert message.
+              <div id="status" class="alert">
+                <strong>{{ status.message }}</strong>
               </div>
             </div>
           </div>
           <div class="row">
             <div class="col-md-12">
+              <script>
+              var status_class = "{{ status.class }}";
+              </script>
               <div id="feedback" class="alert alert-dismissable alert-success">
-                <strong>Interaction status</strong>You successfully read this important alert message.
+                <strong>Task Completed</strong>
               </div>
             </div>
           </div>
