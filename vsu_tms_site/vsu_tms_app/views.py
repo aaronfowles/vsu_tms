@@ -165,7 +165,6 @@ def task_completed(req):
     return HttpResponse("OK")
 
 # Create TaskList
-@login_required()
 def create_task_list(req):
     context = {}
     username = User.objects.get(username='dev')
@@ -174,7 +173,7 @@ def create_task_list(req):
     day = date.today()
     if (TaskList.objects.filter(date_valid_for=day)):
         return HttpResponse("Denied")
-    new_list = TaskList.objects.create(date_valid_for=day,created_by_user_id=username)
+    new_list = TaskList.objects.create(date_valid_for=day,created_by_user_id_id=2)
     tasks = Task.objects.all()
     set_weekly = True if day.isoweekday()==1 else False
     set_monthly = True if day.day==1 else False
