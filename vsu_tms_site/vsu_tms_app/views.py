@@ -82,7 +82,7 @@ def home(req):
 @login_required()
 def my_tasks(req):
     context = {}
-    user = req.user.id
+    user = req.user
     staff = Staff.objects.get(user_id=user).id
     role = Staff.objects.get(id=staff).role_id
     
@@ -116,7 +116,7 @@ def my_tasks(req):
                 context['status']['class'] = 'alert-danger'
                 context['status']['message'] = 'There are outstanding tasks to be completed.'
             context['my_tasks_items'].append(dict(temp_dict))
-    if ((context['all_tasklist_items'] is not None) and (context['status']['class'] is not 'alert-danger')):
+    if ((context['my_tasks_items'] is not None) and (context['status']['class'] is not 'alert-danger')):
         context['status']['class'] = 'alert-warning'
         context['status']['message'] = 'There are pending tasks to complete'
     context['title'] = 'My Tasks'
@@ -135,6 +135,7 @@ def daily_management(req):
         c[str(role)] = {}
         c[str(role)]['pending'] = 0
         c[str(role)]['outstanding'] = 0
+        c[str(role)]['label'] = 'panel-success'
         all_incomplete_tasks = Task.objects.filter(id__in=all_incomplete_task_ids)
         for task in all_incomplete:
             if (Task.objects.get(id=task.task_id.id).assigned_role_id.id == role.id):
@@ -142,7 +143,26 @@ def daily_management(req):
                     c[str(role)]['outstanding'] += 1
                 else:
                     c[str(role)]['pending'] += 1
+    for role,attributes in c.iteritems():
+        if (attributes['outstanding'] > 0):
+            c[str(role)]['label'] = 'panel-danger'
+        elif (attributes['pending'] > 0):
+            c[str(role)]['label'] = 'panel-warning'
+        else:
+            c[str(role)]['label'] = 'panel-success'
     context['title'] = 'Daily Management'
+    context['status'] = {}
+    for role,attributes in c.iteritems():
+        if (attributes['label'] == 'panel-danger'):
+            context['status']['class'] = 'alert-danger'
+            context['status']['message'] = 'There are outstanding tasks to be completed.'
+        elif (attributes['label'] == 'panel-warning' and not context['status']['class'] == 'alert-danger'):
+            context['status']['class'] = 'alert-warning'
+            context['status']['message'] = 'There are pending tasks to be completed.'
+        elif (attributes['label'] == 'panel-warning' and not context['status']['class'] not in ['alert-danger','alert-warning']):
+            context['status']['class'] = 'alert-success'
+            context['status']['message'] = 'There are no tasks to be completed.'
+
     return render(req,'daily_management.html',context)
 
 # Logout
