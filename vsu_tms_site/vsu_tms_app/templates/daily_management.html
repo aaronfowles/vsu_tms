@@ -16,8 +16,8 @@
                 <h3 class="panel-title">{{ k }} </h3>
               </div>
               <div class="panel-body">
-                <p>Pending: {{ v.pending }}</p>
-                <p>Outstanding: {{ v.outstanding }}</p>
+                <p><span class="badge">{{ v.pending }}</span> Pending</p>
+                <p><span class="badge">{{ v.outstanding }}</span> Outstanding</p>
               </div>
             </div>
           </div>
@@ -25,8 +25,4 @@
         </div>
       </div>
     </div>
-<form method="post" action="/app/create_task_list/">
-{% csrf_token %}
-<button class="button btn-success">Update task list</button>
-</form>
 {% endblock content %}

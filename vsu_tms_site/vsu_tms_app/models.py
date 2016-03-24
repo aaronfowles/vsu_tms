@@ -53,6 +53,7 @@ class TaskListItem(models.Model):
     tasklist_id = models.ForeignKey(TaskList,on_delete=models.CASCADE)
     task_id = models.ForeignKey(Task,on_delete=models.PROTECT)
     complete = models.BooleanField(default=False)
+    in_progress = models.BooleanField(default=False)
     notes = models.CharField(max_length=128, blank=True)
     time_due = models.DateTimeField()
 

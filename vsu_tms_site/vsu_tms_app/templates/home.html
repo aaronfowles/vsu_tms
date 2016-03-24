@@ -5,7 +5,7 @@
       <div class="container">
         <div class="row">
           <div class="col-md-12">
-            <h1>Department To-Do List</h1>
+            <h1>All Tasks</h1>
           </div>
         </div>
         <div class="row">
@@ -13,29 +13,17 @@
             <table class="table">
               <thead>
               <tr>
-                <th>Task List ID</th>
-                <th>Task List Item ID</th>
-                <th>Task ID</th>
                 <th>Task Description</th>
                 <th>Assigned To</th>
-                <th>Urgency</th>
-                <th>Time Due</th>
-                <th>Time Active<th>
-                <th>Complete</th>                
+                <th>Time Due</th>               
               </tr>
               </thead>
               {% for tasklist_item in all_tasklist_items|dictsort:"time_due" %}
                   {% if tasklist_item.time_active <= tasklist_item.time_now %}
-                  <tr id="{{ tasklist_item.tasklistitem_id }}">
-                    <td>{{ tasklist_item.tasklist_id }}</td>
-                    <td>{{ tasklist_item.tasklistitem_id }}</td>
-                    <td>{{ tasklist_item.task_id }}</td>
+                  <tr id="{{ tasklist_item.tasklistitem_id }}" class="{{tasklist_item.status}}">
                     <td>{{ tasklist_item.task_desc }}</td>
                     <td>{{ tasklist_item.assigned_role }}</td>
-                    <td>{{ tasklist_item.urgency }}</td>
                     <td>{{ tasklist_item.time_due }}</td>
-                    <td>{{ tasklist_item.time_active }}<td>
-                    <td><button class="btn-success task-checkbox"><span class="glyphicon glyphicon-ok"></span></button></td>
                   </tr>
                   {% endif %}
               {% endfor %}

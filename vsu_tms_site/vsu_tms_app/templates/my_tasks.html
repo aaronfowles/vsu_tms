@@ -5,7 +5,7 @@
       <div class="container">
         <div class="row">
           <div class="col-md-12">
-            <h1>My To-Do List</h1>
+            <h1>{{user}}&#39;s Tasks</h1>
           </div>
         </div>
         <div class="row">
@@ -13,27 +13,20 @@
             <table class="table">
               <thead>
               <tr>
-                <th>Task ID</th>
-                <th>>Task List ID</th>
-                <th>Task List Item ID</th>
                 <th>Task Description</th>
-                <th>Urgency</th>
                 <th>Time Due</th>
-                <th>Time Active</th>
-                <th>Complete</th>
+                <th>Action</th>
               </tr>
               </thead>
               {% for tasks in my_tasks_items|dictsort:"time_due" %}
-                  {% if tasklist_item.time_active <= tasklist_item.time_now %}
-                  <tr id="{{ tasks.tasklistitem_id }}">
-                    <td>{{ tasks.task_id }}</td>
-                    <td>{{ tasks.tasklist_id }}</td>
-                    <td>{{ tasks.tasklistitem_id }}</td>
+                  {% if tasks.time_active <= tasks.time_now %}
+                  <tr id="{{ tasks.tasklistitem_id }}" class="{{tasks.status}}">
                     <td>{{ tasks.task_desc }}</td>
-                    <td>{{ tasks.urgency }}</td>
-                    <td>{{ tasks.time_active }}</td>
                     <td>{{ tasks.time_due }}</td>
-                    <td><button class="btn-success task-checkbox"><span class="glyphicon glyphicon-ok"></span></button></td>
+                    <td><button class="btn btn-default task-checkbox" id="complete"><span class="glyphicon glyphicon-ok"></span></button>
+                        <button class="btn btn-default task-checkbox" id="not-completed"><span class="glyphicon glyphicon-remove"></span></button>
+                        <button class="btn btn-default task-checkbox" id="pending"><span class="glyphicon glyphicon-pushpin"></span></button>
+                    </td>
                   </tr>
                   {% endif %}
               {% endfor %}

@@ -7,6 +7,8 @@ from django.http import HttpResponse
 from django.utils import timezone
 from datetime import date, datetime, timedelta
 
+import smtplib
+
 from .models import TaskListItem, Task, Staff, Role, LookupTaskUrgency, AuditLog, TaskList
 
 # Login page
@@ -26,13 +28,33 @@ def verify(req):
         if user.is_active:
             login(req,user)
             context['title'] = 'Welcome'
-            return render(req, "index.html", context)
+            #return render(req, "home.html", context)
+            return home(req)
         else:
             return render(req,"login.html", context)
     else:
         context['response'].content = "Credentials do not match existing user"
     return render(req,"login.html", context)
 
+# Register page
+def user_register(req):
+    context = {}
+    return render(req, 'register.html', context)
+
+# On registration form submit
+def send_registration_request(req):
+    context = {}
+    SERVER = "localhost"
+    FROM = "admin@vsu.tms"
+    TO = ['aaronfowles@gmail.com']
+    message = 'Username - ' + req.POST['InputName'] + "\r"
+    message += 'Email - ' + req.POST['InputEmail'] + "\r"
+    message += 'Reason - ' + req.POST['InputMessage'] + "\r"
+    server = smtplib.SMTP(SERVER)
+    server.sendmail(FROM,TO,message)
+    server.quit()
+    context['message'] = 'Thank you, your request has been received. Someone will be in touch as soon as possible.'
+    return render(req,'landing.html', context)
 
 # Landing page
 @login_required()
@@ -60,6 +82,13 @@ def home(req):
         task_obj = Task.objects.get(id=tasklist_item.task_id.id)
         temp_dict['task_desc'] = task_obj.task_desc
         temp_dict['assigned_role'] = task_obj.assigned_role_id
+        temp_dict['status'] = ''
+        if (temp_dict['time_due'].astimezone(timezone.utc).replace(tzinfo=None) <= temp_dict['time_now'] and tasklist_item.in_progress == True):
+            temp_dict['status'] = 'warning'
+        elif (temp_dict['time_due'].astimezone(timezone.utc).replace(tzinfo=None) <= temp_dict['time_now']):
+            temp_dict['status'] = 'danger'
+        else:
+            temp_dict['status'] = ''
         urgency = LookupTaskUrgency.objects.get(id=task_obj.task_urgency_id.id)
         if (str(task_obj.task_frequency_id) == 'hourly'):
             dt = tasklist_item.time_due
@@ -68,11 +97,12 @@ def home(req):
             tasklist = TaskList.objects.get(id=tasklist_item.tasklist_id.id)
             temp_dict['time_active'] = tasklist.date_valid_for
         temp_dict['urgency'] = urgency
-        if (tasklist_item.time_due.astimezone(timezone.utc).replace(tzinfo=None) >= datetime.now()):
+        if (tasklist_item.time_due.astimezone(timezone.utc).replace(tzinfo=None) <= datetime.now()):
             context['status']['class'] = 'alert-danger'
             context['status']['message'] = 'There are outstanding tasks to be completed.'
-        context['all_tasklist_items'].append(dict(temp_dict))
-    if ((context['all_tasklist_items'] is not None) and (context['status']['class'] is not 'alert-danger')):
+        if (temp_dict['time_active'] <= datetime.now()):
+            context['all_tasklist_items'].append(dict(temp_dict))
+    if ((len(context['all_tasklist_items']) > 0) and (context['status']['class'] is not 'alert-danger')):
         context['status']['class'] = 'alert-warning'
         context['status']['message'] = 'There are pending tasks to complete'
     context['title'] = 'Home'
@@ -112,13 +142,25 @@ def my_tasks(req):
             else:
                 tasklist = TaskList.objects.get(id=tasklist_item.tasklist_id.id)
                 temp_dict['time_active'] = tasklist.date_valid_for
-            if (tasklist_item.time_due.astimezone(timezone.utc).replace(tzinfo=None) >= datetime.now()):
+            if (tasklist_item.time_due.astimezone(timezone.utc).replace(tzinfo=None) <= datetime.now()):
                 context['status']['class'] = 'alert-danger'
                 context['status']['message'] = 'There are outstanding tasks to be completed.'
-            context['my_tasks_items'].append(dict(temp_dict))
-    if ((context['my_tasks_items'] is not None) and (context['status']['class'] is not 'alert-danger')):
+            
+            temp_dict['status'] = ''
+            if (temp_dict['time_due'].astimezone(timezone.utc).replace(tzinfo=None) <= temp_dict['time_now'] and tasklist_item.in_progress == True):
+                temp_dict['status'] = 'warning'
+            elif (temp_dict['time_due'].astimezone(timezone.utc).replace(tzinfo=None) <= temp_dict['time_now']):
+                temp_dict['status'] = 'danger'
+            else:
+                temp_dict['status'] = ''
+            if (temp_dict['time_active'] <= datetime.now()):
+                context['my_tasks_items'].append(dict(temp_dict))
+    if ((len(context['my_tasks_items']) > 0) and (context['status']['class'] is not 'alert-danger')):
         context['status']['class'] = 'alert-warning'
         context['status']['message'] = 'There are pending tasks to complete'
+    elif (not context['status']['class'] == 'alert-danger'):
+        context['status']['class'] = 'alert-success'
+        context['status']['message'] = 'There are no tasks to complete.'
     context['title'] = 'My Tasks'
     return render(req,'my_tasks.html', context)
 
@@ -138,11 +180,19 @@ def daily_management(req):
         c[str(role)]['label'] = 'panel-success'
         all_incomplete_tasks = Task.objects.filter(id__in=all_incomplete_task_ids)
         for task in all_incomplete:
+            temp_dict = {}
+            if (str(Task.objects.get(id=task.task_id.id).task_frequency_id) == 'hourly'):
+                dt = task.time_due
+                temp_dict['time_active'] = datetime(dt.year,dt.month,dt.day,(dt.hour-1))
+            else:
+                tasklist = TaskList.objects.get(id=task.tasklist_id.id)
+                temp_dict['time_active'] = tasklist.date_valid_for
             if (Task.objects.get(id=task.task_id.id).assigned_role_id.id == role.id):
                 if (task.time_due.astimezone(timezone.utc).replace(tzinfo=None) < datetime.now()):
                     c[str(role)]['outstanding'] += 1
-                else:
+                elif (temp_dict['time_active'] < datetime.now()):
                     c[str(role)]['pending'] += 1
+    
     for role,attributes in c.iteritems():
         if (attributes['outstanding'] > 0):
             c[str(role)]['label'] = 'panel-danger'
@@ -150,12 +200,14 @@ def daily_management(req):
             c[str(role)]['label'] = 'panel-warning'
         else:
             c[str(role)]['label'] = 'panel-success'
+    
     context['title'] = 'Daily Management'
     context['status'] = {}
     for role,attributes in c.iteritems():
         if (attributes['label'] == 'panel-danger'):
             context['status']['class'] = 'alert-danger'
             context['status']['message'] = 'There are outstanding tasks to be completed.'
+            break
         elif (attributes['label'] == 'panel-warning' and not context['status']['class'] == 'alert-danger'):
             context['status']['class'] = 'alert-warning'
             context['status']['message'] = 'There are pending tasks to be completed.'
@@ -178,7 +230,37 @@ def task_completed(req):
     tasklistitem_id = req.POST['tasklistitem_id']
     user_id = req.user
     tasklistitem = TaskListItem.objects.get(id=tasklistitem_id)
+    if (tasklistitem.in_progress == True):
+        tasklistitem.in_progress = False
     tasklistitem.complete = True
+    log = AuditLog(user_id=user_id, tasklist_id=tasklistitem)
+    tasklistitem.save()
+    log.save()
+    return HttpResponse("OK")
+
+# Submit task pending
+@login_required()
+def task_pending(req):
+    context = {}
+    tasklistitem_id = req.POST['tasklistitem_id']
+    user_id = req.user
+    tasklistitem = TaskListItem.objects.get(id=tasklistitem_id)
+    tasklistitem.in_progress = True
+    log = AuditLog(user_id=user_id, tasklist_id=tasklistitem)
+    tasklistitem.save()
+    log.save()
+    return HttpResponse("OK")
+
+# Submit task not completed
+def task_not_completed(req):
+    context = {}
+    tasklistitem_id = req.POST['tasklistitem_id']
+    user_id = req.user
+    tasklistitem = TaskListItem.objects.get(id=tasklistitem_id)
+    if (tasklistitem.in_progress == True):
+        tasklistitem.in_progress = False
+    tasklistitem.complete = True
+    tasklistitem.notes = "Not completed"
     log = AuditLog(user_id=user_id, tasklist_id=tasklistitem)
     tasklistitem.save()
     log.save()

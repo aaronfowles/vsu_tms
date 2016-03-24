@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-
+{% load staticfiles %}
 <head>
 
     <meta charset="utf-8">
@@ -12,7 +12,7 @@
     <title>VSU - TMS</title>
 
     <!-- Bootstrap Core CSS -->
-    <link href="{% 'static' css/bootstrap.min.css %}" rel="stylesheet">
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -25,13 +25,13 @@
 
 <body>
     <!-- Page Content -->
-    <div class="container">
+    <div class="container-fluid">
 
         <!-- Jumbotron Header -->
         <header class="jumbotron hero-spacer">
             <h1>Welcome to the VSU Task Management System</h1>
             <p>This system is maintained by the Vascular Studies Unit. If you are having problems using the system please contact Teresa Robinson or Aaron Fowles. Please DO NOT contact IT as they will be unable to assist.</p>
-            <p><a class="btn btn-success btn-large">Sign In</a><a class="btn btn-info btn-large">Register</a>
+            <p><a class="btn btn-success btn-large" href="{% url 'user_login' %}">Sign In</a><a class="btn btn-info btn-large" href="{% url 'user_register' %}">Register</a>
             </p>
         </header>
         <hr>
@@ -48,10 +48,10 @@
     <!-- /.container -->
 
     <!-- jQuery -->
-    <script src="{% 'static' js/jquery.js %}"></script>
+    <script src="{% static 'js/jquery.js' %}"></script>
 
     <!-- Bootstrap Core JavaScript -->
-    <script src="{% 'static' js/bootstrap.min.js %}"></script>
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
 
 </body>
 
