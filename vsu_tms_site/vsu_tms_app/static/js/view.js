@@ -1,4 +1,3 @@
-$("#feedback").hide();
 $("#status").addClass(status_class);
 $(document).ready( function() {
      $(".task-checkbox").on("click", function() {
@@ -28,7 +27,10 @@ function clickedComplete(id) {
         success: function() {
             var id_string = "#" + id.toString();
             $(id_string).empty();
-            $("#feedback").show();
+	    $("#feedback").removeClass("alert-warning");
+            $("#feedback").removeClass("alert-danger");
+	    $("#feedback").addClass("alert-success");
+            $("#feedback").text("Task Completed");
         }
     });
 };
@@ -47,7 +49,10 @@ function clickedNotComplete(id) {
         success: function() {
             var id_string = "#" + id.toString();
             $(id_string).empty();
-            $("#feedback").show();
+	    $("#feedback").removeClass("alert-warning");
+	    $("#feedback").removeClass("alert-success");
+	    $("#feedback").addClass("alert-danger");
+            $("#feedback").text("Task Not Completed");
         }
     });
 
@@ -66,8 +71,12 @@ function clickedPending(id) {
         data: {'tasklistitem_id':id},
         success: function() {
             var id_string = "#" + id.toString();
-            $(id_string).addClass("warning");
-            $("#feedback").show();
+	    $(id_string).addClass("warning");
+	    $(id_string).removeClass("danger");
+	    $("#feedback").removeClass("alert-success");
+	    $("#feedback").removeClass("alert-danger");
+            $("#feedback").addClass("alert-warning");
+            $("#feedback").text("Task In Progress");
         }
     });
 

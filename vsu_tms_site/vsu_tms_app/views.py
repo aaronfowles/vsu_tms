@@ -282,31 +282,31 @@ def create_task_list(req):
     set_annually = True if set_monthly and day.month==1 else False 
     to_commit = []
     for task in tasks:
-        if (set_annually and task.task_frequency_id == 'annually'):
+        if (set_annually and str(task.task_frequency_id) == 'annually'):
             TaskListItem.objects.create(tasklist_id=new_list,task_id=task,time_due=datetime(day.year,12,31))
             continue
-        if (set_monthly and task.task_frequency_id == 'monthly'):
+        if (set_monthly and str(task.task_frequency_id) == 'monthly'):
             TaskListItem.objects.create(tasklist_id=new_list,task_id=task,time_due=datetime(day.year,(day.month+1),day.day))
             continue
-        if (set_weekly and task.task_frequency_id == 'weekly'):
+        if (set_weekly and str(task.task_frequency_id) == 'weekly'):
             TaskListItem.objects.create(tasklist_id=new_list,task_id=task,time_due=datetime(day.year,day.month,(day.day+7)))
             continue
-        if (task.task_frequency_id == 'monday' and day.isoweekday() == 1):
+        if (str(task.task_frequency_id) == 'monday' and day.isoweekday() == 1):
             TaskListItem.objects.create(tasklist_id=new_list,task_id=task,time_due=datetime(day.year,day.month,day.day,17))
             continue 
-        if (task.task_frequency_id == 'tuesday' and day.isoweekday() == 2):
+        if (str(task.task_frequency_id) == 'tuesday' and day.isoweekday() == 2):
             TaskListItem.objects.create(tasklist_id=new_list,task_id=task,time_due=datetime(day.year,day.month,day.day,17))
             continue
-        if (task.task_frequency_id == 'wednesday' and day.isoweekday() == 3):
+        if (str(task.task_frequency_id) == 'wednesday' and day.isoweekday() == 3):
             TaskListItem.objects.create(tasklist_id=new_list,task_id=task,time_due=datetime(day.year,day.month,day.day,17))
             continue
-        if (task.task_frequency_id == 'thursday' and day.isoweekday() == 4):
+        if (str(task.task_frequency_id) == 'thursday' and day.isoweekday() == 4):
             TaskListItem.objects.create(tasklist_id=new_list,task_id=task,time_due=datetime(day.year,day.month,day.day,17))
             continue
-        if (task.task_frequency_id == 'friday' and day.isoweekday() == 5):
+        if (str(task.task_frequency_id) == 'friday' and day.isoweekday() == 5):
             TaskListItem.objects.create(tasklist_id=new_list,task_id=task,time_due=datetime(day.year,day.month,day.day,17))
             continue
-        if (task.task_frequency_id == 'daily' and day.isoweekday() not in [6,7]):
+        if (str(task.task_frequency_id) == 'daily' and day.isoweekday() not in [6,7]):
             TaskListItem.objects.create(tasklist_id=new_list,task_id=task,time_due=datetime(day.year,day.month,day.day,17))
             continue
         if (str(task.task_frequency_id) == 'hourly' and day.isoweekday() not in [6,7]):
