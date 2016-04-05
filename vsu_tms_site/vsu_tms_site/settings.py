@@ -29,7 +29,7 @@ SECRET_KEY = '))xq4lzu77h4)-9zkv%66uf#b0_3_cnflxsr4fhy#r4h9rs!&k'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -131,8 +131,7 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-STATIC_ROOT = "/vsu_tms_dev/vsu_tms_site/static"
-# Testing
+STATIC_ROOT = "/vsu_tms_dev/vsu_tms_site/static/"
 
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 

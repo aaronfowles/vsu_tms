@@ -204,6 +204,7 @@ def daily_management(req):
     context['title'] = 'Daily Management'
     context['status'] = {}
     for role,attributes in c.iteritems():
+	context['status']['class'] = ''
         if (attributes['label'] == 'panel-danger'):
             context['status']['class'] = 'alert-danger'
             context['status']['message'] = 'There are outstanding tasks to be completed.'
