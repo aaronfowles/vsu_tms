@@ -6,8 +6,8 @@ import requests
 if __name__=='__main__':
     client = requests.session()
 
-    host = 'http://178.62.111.80'
-    port = ':8001/app/'
+    host = 'https://178.62.111.80'
+    port = '/app/'
     
     app_url = host + port + 'login/'
 
