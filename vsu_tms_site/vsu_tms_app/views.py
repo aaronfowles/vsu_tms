@@ -8,6 +8,7 @@ from django.utils import timezone
 from datetime import date, datetime, timedelta
 
 import smtplib
+import pytz
 
 from .models import TaskListItem, Task, Staff, Role, LookupTaskUrgency, AuditLog, TaskList
 
@@ -74,7 +75,11 @@ def home(req):
     context['all_tasklist_items'] = []
     for tasklist_item in all_incomplete:
         temp_dict = {}
-        temp_dict['time_now'] = datetime.now()
+        dt = datetime.now()
+        dt = dt.replace(tzinfo=pytz.utc)
+        bst = pytz.timezone('Europe/London')
+        dt_now = dt.astimezone(bst).replace(tzinfo=None)
+        temp_dict['time_now'] = dt_now
         temp_dict['tasklistitem_id'] = tasklist_item.id
         temp_dict['tasklist_id'] = tasklist_item.tasklist_id.id
         temp_dict['time_due'] = tasklist_item.time_due
@@ -82,7 +87,7 @@ def home(req):
         task_obj = Task.objects.get(id=tasklist_item.task_id.id)
         temp_dict['task_desc'] = task_obj.task_desc
         temp_dict['assigned_role'] = task_obj.assigned_role_id
-        temp_dict['status'] = ''
+        temp_dict['status'] = '' 
         if (temp_dict['time_due'].astimezone(timezone.utc).replace(tzinfo=None) <= temp_dict['time_now'] and tasklist_item.in_progress == True):
             temp_dict['status'] = 'warning'
         elif (temp_dict['time_due'].astimezone(timezone.utc).replace(tzinfo=None) <= temp_dict['time_now']):
@@ -95,12 +100,12 @@ def home(req):
             temp_dict['time_active'] = datetime(dt.year,dt.month,dt.day,(dt.hour-1))
         else:
             tasklist = TaskList.objects.get(id=tasklist_item.tasklist_id.id)
-            temp_dict['time_active'] = tasklist.date_valid_for
+            temp_dict['time_active'] = datetime(tasklist.date_valid_for.year,tasklist.date_valid_for.month,tasklist.date_valid_for.day,9)
         temp_dict['urgency'] = urgency
-        if (tasklist_item.time_due.astimezone(timezone.utc).replace(tzinfo=None) <= datetime.now()):
+        if (tasklist_item.time_due.astimezone(timezone.utc).replace(tzinfo=None) <= dt_now):
             context['status']['class'] = 'alert-danger'
             context['status']['message'] = 'There are outstanding tasks to be completed.'
-        if (temp_dict['time_active'] <= datetime.now()):
+        if (temp_dict['time_active'] <= dt_now):
             context['all_tasklist_items'].append(dict(temp_dict))
     if ((len(context['all_tasklist_items']) > 0) and (context['status']['class'] is not 'alert-danger')):
         context['status']['class'] = 'alert-warning'
@@ -126,7 +131,11 @@ def my_tasks(req):
         task_obj = Task.objects.get(id=tasklist_item.task_id.id)
         if (task_obj.assigned_role_id.id == role.id):
             temp_dict = {}
-            temp_dict['time_now'] = datetime.now()
+            dt = datetime.now()
+            dt = dt.replace(tzinfo=pytz.utc)
+            bst = pytz.timezone('Europe/London')
+            dt_now = dt.astimezone(bst).replace(tzinfo=None)
+            temp_dict['time_now'] = dt_now
             temp_dict['tasklistitem_id'] = tasklist_item.id
             temp_dict['tasklist_id'] = tasklist_item.tasklist_id.id
             temp_dict['time_due'] = tasklist_item.time_due
@@ -141,8 +150,8 @@ def my_tasks(req):
                 temp_dict['time_active'] = datetime(dt.year,dt.month,dt.day,(dt.hour-1))
             else:
                 tasklist = TaskList.objects.get(id=tasklist_item.tasklist_id.id)
-                temp_dict['time_active'] = tasklist.date_valid_for
-            if (tasklist_item.time_due.astimezone(timezone.utc).replace(tzinfo=None) <= datetime.now()):
+                temp_dict['time_active'] = datetime(tasklist.date_valid_for.year,tasklist.date_valid_for.month,tasklist.date_valid_for.day,9)
+            if (tasklist_item.time_due.astimezone(timezone.utc).replace(tzinfo=None) <= dt_now):
                 context['status']['class'] = 'alert-danger'
                 context['status']['message'] = 'There are outstanding tasks to be completed.'
             
@@ -153,7 +162,7 @@ def my_tasks(req):
                 temp_dict['status'] = 'danger'
             else:
                 temp_dict['status'] = ''
-            if (temp_dict['time_active'] <= datetime.now()):
+            if (temp_dict['time_active'] <= dt_now):
                 context['my_tasks_items'].append(dict(temp_dict))
     if ((len(context['my_tasks_items']) > 0) and (context['status']['class'] is not 'alert-danger')):
         context['status']['class'] = 'alert-warning'
@@ -173,6 +182,10 @@ def daily_management(req):
     all_roles = Role.objects.all()
     context['items'] = {}
     c = context['items']
+    dt = datetime.now()
+    dt = dt.replace(tzinfo=pytz.utc)
+    bst = pytz.timezone('Europe/London')
+    dt_now = dt.astimezone(bst).replace(tzinfo=None)
     for role in all_roles:
         c[str(role)] = {}
         c[str(role)]['pending'] = 0
@@ -186,11 +199,11 @@ def daily_management(req):
                 temp_dict['time_active'] = datetime(dt.year,dt.month,dt.day,(dt.hour-1))
             else:
                 tasklist = TaskList.objects.get(id=task.tasklist_id.id)
-                temp_dict['time_active'] = tasklist.date_valid_for
+                temp_dict['time_active'] = datetime(tasklist.date_valid_for.year,tasklist.date_valid_for.month,tasklist.date_valid_for.day,9)
             if (Task.objects.get(id=task.task_id.id).assigned_role_id.id == role.id):
-                if (task.time_due.astimezone(timezone.utc).replace(tzinfo=None) < datetime.now()):
+                if (task.time_due.astimezone(timezone.utc).replace(tzinfo=None) < dt_now):
                     c[str(role)]['outstanding'] += 1
-                elif (temp_dict['time_active'] < datetime.now()):
+                elif (temp_dict['time_active'] < dt_now):
                     c[str(role)]['pending'] += 1
     
     for role,attributes in c.iteritems():
@@ -284,13 +297,13 @@ def create_task_list(req):
     to_commit = []
     for task in tasks:
         if (set_annually and str(task.task_frequency_id) == 'annually'):
-            TaskListItem.objects.create(tasklist_id=new_list,task_id=task,time_due=datetime(day.year,12,31))
+            TaskListItem.objects.create(tasklist_id=new_list,task_id=task,time_due=datetime(day.year,12,31,17))
             continue
         if (set_monthly and str(task.task_frequency_id) == 'monthly'):
-            TaskListItem.objects.create(tasklist_id=new_list,task_id=task,time_due=datetime(day.year,(day.month+1),day.day))
+            TaskListItem.objects.create(tasklist_id=new_list,task_id=task,time_due=datetime(day.year,(day.month+1),day.day,17))
             continue
         if (set_weekly and str(task.task_frequency_id) == 'weekly'):
-            TaskListItem.objects.create(tasklist_id=new_list,task_id=task,time_due=datetime(day.year,day.month,(day.day+7)))
+            TaskListItem.objects.create(tasklist_id=new_list,task_id=task,time_due=datetime(day.year,day.month,(day.day+7),17))
             continue
         if (str(task.task_frequency_id) == 'monday' and day.isoweekday() == 1):
             TaskListItem.objects.create(tasklist_id=new_list,task_id=task,time_due=datetime(day.year,day.month,day.day,17))
