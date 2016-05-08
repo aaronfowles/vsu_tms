@@ -1,6 +1,13 @@
 {% extends "base.html" %}
 
 {% block content %}
+<div id="dialog" title="Dialog Form" class="form-group">
+<form action="" method="post">
+<label>Please enter a reason explaining why the task was not completed</label>
+<input id="reason" name="reason" type="text">
+<input id="submit-not-clicked" type="button" value="Submit">
+</form>
+</div>
     <div class="section">
       <div class="container">
         <div class="row">
@@ -23,9 +30,9 @@
                   <tr id="{{ tasks.tasklistitem_id }}" class="{{tasks.status}}">
                     <td>{{ tasks.task_desc }}</td>
                     <td>{{ tasks.time_due }}</td>
-                    <td><button class="btn btn-default task-checkbox" id="complete"><span class="glyphicon glyphicon-ok"></span></button>
-                        <button class="btn btn-default task-checkbox" id="not-completed"><span class="glyphicon glyphicon-remove"></span></button>
-                        <button class="btn btn-default task-checkbox" id="pending"><span class="glyphicon glyphicon-pushpin"></span></button>
+                    <td><button class="btn btn-default task-checkbox" id="complete" title="Record as completed"><span class="glyphicon glyphicon-ok"></span></button>
+                        <button class="btn btn-default task-checkbox" id="not-completed" title="Record as not completed"><span class="glyphicon glyphicon-remove"></span></button>
+                        <button class="btn btn-default task-checkbox" id="pending" title="Record as in progress"><span class="glyphicon glyphicon-pushpin"></span></button>
                     </td>
                   </tr>
                   {% endif %}

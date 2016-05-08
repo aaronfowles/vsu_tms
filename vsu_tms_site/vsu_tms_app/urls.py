@@ -18,4 +18,5 @@ urlpatterns = [
     url(r'^send_registration_request', views.send_registration_request, name='send_registration_request'),
     url(r'^task_not_completed', views.task_not_completed, name='task_not_completed'),
     url(r'^task_pending', views.task_pending, name='task_pending'),
+    url(r'^role_tasks/(?P<role_id>\w+/$)',views.role_tasks, name='role_tasks'),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

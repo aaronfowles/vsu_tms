@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="section">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-12">
+            <h1>{{ title }} Tasks</h1>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-12">
+            <table class="table">
+              <thead>
+              <tr>
+                <th>Task Description</th>
+                <th>Status</th>
+                <th>Time Due</th>               
+              </tr>
+              </thead>
+              {% for tasklist_item in role_tasklist_items|dictsort:"time_due" %}
+                  {% if tasklist_item.time_active <= tasklist_item.time_now %}
+                  <tr id="{{ tasklist_item.tasklistitem_id }}" class="{{tasklist_item.status}}">
+                    <td>{{ tasklist_item.task_desc }}</td>
+                    <td>{{ tasklist_item.assigned_role }}</td>
+                    <td>{{ tasklist_item.time_due }}</td>
+                  </tr>
+                  {% endif %}
+              {% endfor %}
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+{% endblock content %}

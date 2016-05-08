@@ -88,7 +88,7 @@ def home(req):
         temp_dict['task_desc'] = task_obj.task_desc
         temp_dict['assigned_role'] = task_obj.assigned_role_id
         temp_dict['status'] = '' 
-        if (temp_dict['time_due'].astimezone(timezone.utc).replace(tzinfo=None) <= temp_dict['time_now'] and tasklist_item.in_progress == True):
+        if (tasklist_item.in_progress == True):
             temp_dict['status'] = 'warning'
         elif (temp_dict['time_due'].astimezone(timezone.utc).replace(tzinfo=None) <= temp_dict['time_now']):
             temp_dict['status'] = 'danger'
@@ -112,6 +112,60 @@ def home(req):
         context['status']['message'] = 'There are pending tasks to complete'
     context['title'] = 'Home'
     return render(req, 'home.html', context)
+
+# Role Tasks
+@login_required()
+def role_tasks(req, role_id):
+    indexOfSlash = role_id.index('/')
+    role_from_req = int(role_id[0:indexOfSlash])
+    context = {}
+    context['status'] = {}
+    context['status']['class'] = 'alert-success'
+    context['status']['message'] = 'There are no tasks to complete.'
+    all_incomplete = TaskListItem.objects.filter(complete=False).select_related()
+    context['role_tasklist_items'] = []
+    for tasklist_item in all_incomplete:
+        if (not (Task.objects.get(id=tasklist_item.task_id.id).assigned_role_id.id == role_from_req)):
+            continue
+        temp_dict = {}
+        dt = datetime.now()
+        dt = dt.replace(tzinfo=pytz.utc)
+        bst = pytz.timezone('Europe/London')
+        dt_now = dt.astimezone(bst).replace(tzinfo=None)
+        temp_dict['time_now'] = dt_now
+        temp_dict['tasklistitem_id'] = tasklist_item.id
+        temp_dict['tasklist_id'] = tasklist_item.tasklist_id.id
+        temp_dict['time_due'] = tasklist_item.time_due
+        temp_dict['task_id'] = tasklist_item.task_id.id
+        task_obj = Task.objects.get(id=tasklist_item.task_id.id)
+        temp_dict['task_desc'] = task_obj.task_desc
+        temp_dict['assigned_role'] = task_obj.assigned_role_id
+        temp_dict['status'] = ''
+        if (tasklist_item.in_progress == True):
+            temp_dict['status'] = 'warning'
+        elif (temp_dict['time_due'].astimezone(timezone.utc).replace(tzinfo=None) <= temp_dict['time_now']):
+            temp_dict['status'] = 'danger'
+        else:
+            temp_dict['status'] = ''
+        urgency = LookupTaskUrgency.objects.get(id=task_obj.task_urgency_id.id)
+        if (str(task_obj.task_frequency_id) == 'hourly'):
+            dt = tasklist_item.time_due
+            temp_dict['time_active'] = datetime(dt.year,dt.month,dt.day,(dt.hour-1))
+        else:
+            tasklist = TaskList.objects.get(id=tasklist_item.tasklist_id.id)
+            temp_dict['time_active'] = datetime(tasklist.date_valid_for.year,tasklist.date_valid_for.month,tasklist.date_valid_for.day,9)
+        temp_dict['urgency'] = urgency
+        if (tasklist_item.time_due.astimezone(timezone.utc).replace(tzinfo=None) <= dt_now):
+            context['status']['class'] = 'alert-danger'
+            context['status']['message'] = 'There are outstanding tasks to be completed.'
+        if (temp_dict['time_active'] <= dt_now):
+            context['role_tasklist_items'].append(dict(temp_dict))
+    if ((len(context['role_tasklist_items']) > 0) and (context['status']['class'] is not 'alert-danger')):
+        context['status']['class'] = 'alert-warning'
+        context['status']['message'] = 'There are pending tasks to complete'
+    context['title'] = Role.objects.get(id=role_from_req)
+    return render(req, 'role_tasks.html', context)
+
 
 # My Tasks page
 @login_required()
@@ -156,7 +210,7 @@ def my_tasks(req):
                 context['status']['message'] = 'There are outstanding tasks to be completed.'
             
             temp_dict['status'] = ''
-            if (temp_dict['time_due'].astimezone(timezone.utc).replace(tzinfo=None) <= temp_dict['time_now'] and tasklist_item.in_progress == True):
+            if (tasklist_item.in_progress == True):
                 temp_dict['status'] = 'warning'
             elif (temp_dict['time_due'].astimezone(timezone.utc).replace(tzinfo=None) <= temp_dict['time_now']):
                 temp_dict['status'] = 'danger'
@@ -191,6 +245,7 @@ def daily_management(req):
         c[str(role)]['pending'] = 0
         c[str(role)]['outstanding'] = 0
         c[str(role)]['label'] = 'panel-success'
+        c[str(role)]['id'] = role.id
         all_incomplete_tasks = Task.objects.filter(id__in=all_incomplete_task_ids)
         for task in all_incomplete:
             temp_dict = {}
@@ -247,7 +302,7 @@ def task_completed(req):
     if (tasklistitem.in_progress == True):
         tasklistitem.in_progress = False
     tasklistitem.complete = True
-    log = AuditLog(user_id=user_id, tasklist_id=tasklistitem)
+    log = AuditLog(user_id=user_id, tasklist_id=tasklistitem, status='completed')
     tasklistitem.save()
     log.save()
     return HttpResponse("OK")
@@ -260,7 +315,7 @@ def task_pending(req):
     user_id = req.user
     tasklistitem = TaskListItem.objects.get(id=tasklistitem_id)
     tasklistitem.in_progress = True
-    log = AuditLog(user_id=user_id, tasklist_id=tasklistitem)
+    log = AuditLog(user_id=user_id, tasklist_id=tasklistitem,status='in progress')
     tasklistitem.save()
     log.save()
     return HttpResponse("OK")
@@ -269,13 +324,15 @@ def task_pending(req):
 def task_not_completed(req):
     context = {}
     tasklistitem_id = req.POST['tasklistitem_id']
+    reason = req.POST['reason']
     user_id = req.user
     tasklistitem = TaskListItem.objects.get(id=tasklistitem_id)
     if (tasklistitem.in_progress == True):
         tasklistitem.in_progress = False
     tasklistitem.complete = True
-    tasklistitem.notes = "Not completed"
-    log = AuditLog(user_id=user_id, tasklist_id=tasklistitem)
+    tasklistitem.notes = reason
+    status_string = 'Not completed because ' + str(req.user) + ' said ' + str(reason) 
+    log = AuditLog(user_id=user_id, tasklist_id=tasklistitem,status=status_string)
     tasklistitem.save()
     log.save()
     return HttpResponse("OK")

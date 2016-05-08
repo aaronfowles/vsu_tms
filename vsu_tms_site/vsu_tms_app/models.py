@@ -71,6 +71,7 @@ class AuditLog(models.Model):
     user_id = models.ForeignKey(User, on_delete=models.PROTECT)
     timestamp = models.DateTimeField(auto_now=True)
     tasklist_id = models.ForeignKey(TaskListItem, on_delete=models.PROTECT)
+    status = models.CharField(max_length=64)
 
     def __str__(self):
         return str(self.user_id) + str(self.timestamp) + str(self.tasklist_id)

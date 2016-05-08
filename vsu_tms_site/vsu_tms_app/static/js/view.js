@@ -1,14 +1,20 @@
 $("#status").addClass(status_class);
+var id_global = '';
 $(document).ready( function() {
      $(".task-checkbox").on("click", function() {
-         var id = $(this).parent().parent().attr("id");
+         id_global = $(this).parent().parent().attr("id");
          if ($(this).attr("id") == 'not-completed') {
-             clickedNotComplete(id);
+             $("#dialog").show();
          } else if($(this).attr("id") == 'pending') {
-             clickedPending(id);
+             clickedPending(id_global);
          } else if($(this).attr("id") == 'complete') {
-             clickedComplete(id);
+             clickedComplete(id_global);
          }
+     });
+     $("#dialog").hide();
+     $("#submit-not-clicked").on("click", function() {
+          clickedNotComplete(id_global,document.getElementById('reason').value);
+	  $("#dialog").hide();
      });
 });
 
@@ -35,7 +41,7 @@ function clickedComplete(id) {
     });
 };
 
-function clickedNotComplete(id) {
+function clickedNotComplete(id,reason) {
     $.ajaxSetup({
         beforeSend: function (xhr)
         {
@@ -45,7 +51,7 @@ function clickedNotComplete(id) {
     $.ajax({
         type:"POST",
         url:"/app/task_not_completed/",
-        data: {'tasklistitem_id':id},
+        data: {'tasklistitem_id':id, 'reason':reason},
         success: function() {
             var id_string = "#" + id.toString();
             $(id_string).empty();
@@ -56,6 +62,10 @@ function clickedNotComplete(id) {
         }
     });
 
+};
+
+function sendNotComplete(id) {
+    clickedNotComplete(id,reason);
 };
 
 function clickedPending(id) {

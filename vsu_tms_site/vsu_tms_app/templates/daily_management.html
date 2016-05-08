@@ -13,7 +13,8 @@
           <div class="col-md-4">
             <div class="panel {{v.label}}">
               <div class="panel-heading">
-                <h3 class="panel-title">{{ k }} </h3>
+                {% url 'role_tasks' as the_url%}
+                <a href="https://vsu.website/app/role_tasks/{{v.id}}/"><h3 class="panel-title role-panel" id="{{v.id}}">{{ k }}</h3></a>
               </div>
               <div class="panel-body">
                 <p><span class="badge">{{ v.pending }}</span> Pending</p>

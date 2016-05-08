@@ -35,6 +35,7 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
+    'doppler_app',
     'django_cron',
     'vsu_tms_app.apps.VsuTmsAppConfig',
     'django_nose',
