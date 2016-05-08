@@ -3,7 +3,7 @@
   <body>
     <audio controls autoplay></audio>
     <script type="text/javascript" src="{% static 'js/recorder.js' %}"> </script>
-
+    <script type="text/javascript" src="{% static 'js/jquery.js' %}"></script>
     <input onclick="startRecording()" type="button" value="start recording" />
     <input onclick="stopRecording()" type="button" value="stop recording and play" />
 
@@ -39,21 +39,32 @@
       function stopRecording() {
         recorder.stop();
         recorder.exportWAV(function(s) {
-          var url = window.URL.createObjectURL(s);
-          audio.src = url;
-          var reader = new FileReader();
-          var formData = new FormData();
-          formData.append('audio', url);
-           $.ajax({
-            type: 'POST'
-            , url: 'https://vsu.website/upload_doppler'
-            , data: formData
-            , processData: false
-            , contentType: false
-            , dataType: 'json'
-            , cache: false
-           });
-        });
+        var url = window.URL.createObjectURL(s);
+        audio.src = url;
+        var request = new XMLHttpRequest();
+        request.open("GET",url,true);
+        request.responseType = 'blob';
+        var blob;
+        request.onload = function() {
+            blob = request.response;
+            var formData = new FormData();
+            formData.append('audio',blob);
+            console.log(blob);
+              $.ajax({
+                type: 'POST'
+                , beforeSend: function (xhr) {
+                    xhr.setRequestHeader('X-CSRFToken', "{{csrf_token}}");
+                 }
+                , url: 'https://vsu.website/doppler/upload_doppler/'
+                , data: formData
+                , processData: false
+                , contentType: false
+                , dataType: 'json'
+                , cache: false
+              });
+         }
+         request.send();
+         });
       }
     </script>
   </body>
