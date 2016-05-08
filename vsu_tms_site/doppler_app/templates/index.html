@@ -39,7 +39,20 @@
       function stopRecording() {
         recorder.stop();
         recorder.exportWAV(function(s) {
-          audio.src = window.URL.createObjectURL(s);
+          var url = window.URL.createObjectURL(s);
+          audio.src = url;
+          var reader = new FileReader();
+          var formData = new FormData();
+          formData.append('audio', url);
+           $.ajax({
+            type: 'POST'
+            , url: 'https://vsu.website/upload_doppler'
+            , data: formData
+            , processData: false
+            , contentType: false
+            , dataType: 'json'
+            , cache: false
+           });
         });
       }
     </script>
