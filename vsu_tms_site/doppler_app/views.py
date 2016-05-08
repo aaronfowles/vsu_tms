@@ -12,10 +12,14 @@ def index(request):
 
 def upload_doppler(request):
     doppler_blob = request.FILES['audio']
+
+    dest_file_handle = 'doppler_audio_samples/test_audio' + str(np.random.randint(0,1000))
     
-    destination = open('test_audio.wav', 'wb+')
+    destination = open(dest_file_handle, 'wb+')
     for chunk in doppler_blob.chunks():
         destination.write(chunk)
     destination.close()
+
+    rate, wf = scipy.io.wavfile.read(dest_file_handle)
 
     return JsonResponse({'received':'true','saved':'false'}) 
