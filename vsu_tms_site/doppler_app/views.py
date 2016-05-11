@@ -5,6 +5,7 @@ from StringIO import StringIO
 import wave
 import scipy.io.wavfile
 import numpy as np
+from datetime import datetime
 
 # Create your views here.
 def index(request):
@@ -13,7 +14,7 @@ def index(request):
 def upload_doppler(request):
     doppler_blob = request.FILES['audio']
 
-    dest_file_handle = 'doppler_audio_samples/test_audio' + str(np.random.randint(0,1000))
+    dest_file_handle = 'doppler_audio_samples/test_audio' + str(datetime.now())
     
     destination = open(dest_file_handle, 'wb+')
     for chunk in doppler_blob.chunks():
