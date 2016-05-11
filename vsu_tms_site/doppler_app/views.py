@@ -17,7 +17,7 @@ def index(request):
 def upload_doppler(request):
     doppler_blob = request.FILES['audio']
 
-    dest_file_handle = 'doppler_audio_samples/test_audio' + str(datetime.now())
+    dest_file_handle = 'doppler_audio_samples/test_audio' + str(datetime.now().strftime('%Y-%m-%d_%H:%M:%S'))
     dest_file_handle = normpath(join(getcwd(),dest_file_handle))
     destination = open(dest_file_handle, 'wb+')
     for chunk in doppler_blob.chunks():
