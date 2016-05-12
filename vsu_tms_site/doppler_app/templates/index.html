@@ -52,7 +52,6 @@
         recorder.stop();
         recorder.exportWAV(function(s) {
         var url = window.URL.createObjectURL(s);
-        audio.src = url;
         var request = new XMLHttpRequest();
         request.open("GET",url,true);
         request.responseType = 'blob';

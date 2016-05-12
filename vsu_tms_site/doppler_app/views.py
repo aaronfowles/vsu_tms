@@ -67,7 +67,7 @@ def upload_doppler(request):
     num_points = 0
     for i in range(0,len(start_indices)):
         if (start_indices[i] is not 0):
-            num_points[str(i)] += 1
+            num_points += 1
     context['num_waveforms'] = num_points
 
     return render(request,'results.html', context)
