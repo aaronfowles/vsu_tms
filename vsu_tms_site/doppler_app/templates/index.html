@@ -18,6 +18,8 @@
           <button style="color:red" onclick="startRecording()" class="glyphicon glyphicon-record"></button>
           <button onclick="stopRecording()" class="glyphicon glyphicon-stop"></button>
       </div>
+      <div style="font-size:3em" id="results-display">
+      </div>
     </div>
     <script>
       var onFail = function(e) {
@@ -70,9 +72,14 @@
                 , data: formData
                 , processData: false
                 , contentType: false
-                , dataType: 'json'
+                , dataType: 'text json'
                 , cache: false
+		, success: function(data) {
+			var text_string = "Number of waveforms: " + data.num_waveforms + "Sample length (s): " + data.sample_length_secs; 
+			$("#results-display").append(text_string);
+		}
               });
+		$("#results-display").text("Calculating results...")
          }
          request.send();
          });

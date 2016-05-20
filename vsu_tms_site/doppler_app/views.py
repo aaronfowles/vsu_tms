@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 
 from StringIO import StringIO
 import wave
@@ -15,7 +15,6 @@ def index(request):
     return render(request,'index.html')
 
 def upload_doppler(request):
-    print('upload doppler called')
     doppler_blob = request.FILES['audio']
 
     dest_file_handle = 'doppler_audio_samples/' + str(datetime.now().strftime('%Y-%m-%d_%H-%M'))
@@ -30,7 +29,6 @@ def upload_doppler(request):
     wf = wf[:,0]
 
     # Band-pass filtering
-    print('find waveform called')
     nyq = 0.5 * 44100
     cutoff = 250 / nyq
     b, a = signal.butter(4,cutoff,'highpass')
@@ -70,4 +68,4 @@ def upload_doppler(request):
             num_points += 1
     context['num_waveforms'] = num_points
 
-    return render(request,'results.html', context)
+    return JsonResponse(context)
