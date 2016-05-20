@@ -1,0 +1,82 @@
+{% load staticfiles %}
+<html>
+  <body style="height:100vh; width:100vw">
+    <script type="text/javascript" src="{% static 'js/recorder.js' %}"> </script>
+    <script type="text/javascript" src="{% static 'js/jquery.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+    <div class="container">
+      <div class="row">
+	<ol class="list-group" style="font-size:3em">
+	  <li class="list-group-item">Place phone 6-12 inches away from the doppler speaker</li>
+	  <li class="list-group-item">Press record</li>
+	  <li class="list-group-item">After around 5 seconds press stop</li>
+	</ol>
+      </div>
+      <div class="row" style="height:30%; font-size:10em; padding:2%; text-align: center">
+          <button style="color:red" onclick="startRecording()" class="glyphicon glyphicon-record"></button>
+          <button onclick="stopRecording()" class="glyphicon glyphicon-stop"></button>
+      </div>
+    </div>
+    <script>
+      var onFail = function(e) {
+        console.log('Rejected!', e);
+      };
+
+      var onSuccess = function(s) {
+        var context = new AudioContext();
+        var mediaStreamSource = context.createMediaStreamSource(s);
+        recorder = new Recorder(mediaStreamSource);
+        recorder.record();
+
+        // audio loopback
+        // mediaStreamSource.connect(context.destination);
+      }
+
+      window.URL = window.URL || window.webkitURL;
+      navigator.getUserMedia  = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
+
+      var recorder;
+      var audio = document.querySelector('audio');
+
+      function startRecording() {
+        if (navigator.getUserMedia) {
+          navigator.getUserMedia({audio: true}, onSuccess, onFail);
+        } else {
+          console.log('navigator.getUserMedia not present');
+        }
+      }
+
+      function stopRecording() {
+        recorder.stop();
+        recorder.exportWAV(function(s) {
+        var url = window.URL.createObjectURL(s);
+        var request = new XMLHttpRequest();
+        request.open("GET",url,true);
+        request.responseType = 'blob';
+        var blob;
+        request.onload = function() {
+            blob = request.response;
+            var formData = new FormData();
+            formData.append('audio',blob);
+            console.log(blob);
+              $.ajax({
+                type: 'POST'
+                , beforeSend: function (xhr) {
+                    xhr.setRequestHeader('X-CSRFToken', "{{csrf_token}}");
+                 }
+                , url: 'https://vsu.website/doppler/upload_doppler/'
+                , data: formData
+                , processData: false
+                , contentType: false
+                , dataType: 'json'
+                , cache: false
+              });
+         }
+         request.send();
+         });
+      }
+    </script>
+  </body>
+</html>
