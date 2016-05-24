@@ -15,13 +15,20 @@
 	</ol>
       </div>
       <div class="row" style="height:30%; font-size:10em; padding:2%; text-align: center">
-          <button style="color:red" onclick="startRecording()" class="glyphicon glyphicon-record"></button>
-          <button onclick="stopRecording()" class="glyphicon glyphicon-stop"></button>
+          <button id="recording" style="color:red" type="button"><span class="glyphicon glyphicon-record"></span></button>
+          <button id="stop" type="button"><span class="glyphicon glyphicon-stop"></span></button>
       </div>
       <div style="font-size:3em" id="results-display">
       </div>
     </div>
     <script>
+      $("#recording").on('click',function() {
+	startRecording();
+	});
+	$("#stop").on('click',function() {
+        stopRecording();
+        });
+
       var onFail = function(e) {
         console.log('Rejected!', e);
       };
@@ -75,8 +82,10 @@
                 , dataType: 'text json'
                 , cache: false
 		, success: function(data) {
-			var text_string = "Number of waveforms: " + data.num_waveforms + "Sample length (s): " + data.sample_length_secs; 
-			$("#results-display").append(text_string);
+			var text_string = "Number of waveforms: " + data.num_waveforms + "Sample length (s): " + data.sample_length_secs + "HR: " + (parseInt(data.num_waveforms) / parseFloat(data.sample_length_secs))*60; 
+			$("#results-display").append("Number of waveforms: " + data.num_waveforms);
+			$("#results-display").append("Sample length (s): " + data.sample_length_secs );
+			$("#results-display").append((parseInt(data.num_waveforms) / parseFloat(data.sample_length_secs))*60);			
 		}
               });
 		$("#results-display").text("Calculating results...")
