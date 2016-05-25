@@ -82,6 +82,18 @@ def upload_doppler(request):
     for pair in wf_start_stop_points:
         wf_list.append(wf[pair[0]:pair[1]])
 
+    context['waves'] = []
+    for wf_wave in wf_list:
+        temp_dict = {}
+
+        temp_dict['mean'] = wf_wave.mean()
+        energy = 0
+        for i in range(0,len(wf_wave)-1):
+            energy += wf_wave[i]*wf_wave[i]
+        temp_dict['raw_energy'] = energy
+
+        context['waves'].append(temp_dict)
+
     context['num_waveforms'] = num_points
 
     return JsonResponse(context)

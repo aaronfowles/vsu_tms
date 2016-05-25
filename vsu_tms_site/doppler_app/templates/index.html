@@ -82,10 +82,12 @@
                 , dataType: 'text json'
                 , cache: false
 		, success: function(data) {
-			var text_string = "Number of waveforms: " + data.num_waveforms + "Sample length (s): " + data.sample_length_secs + "HR: " + (parseInt(data.num_waveforms) / parseFloat(data.sample_length_secs))*60; 
-			$("#results-display").append("Number of waveforms: " + data.num_waveforms);
-			$("#results-display").append("Sample length (s): " + data.sample_length_secs );
-			$("#results-display").append((parseInt(data.num_waveforms) / parseFloat(data.sample_length_secs))*60);			
+			$("#results-display").append("<ul id='results'></ul>")
+			var text_string = "<li>Number of waveforms: " + data.num_waveforms + "</li>"; 
+			$("#results").append(text_string);
+			$("#results").append("<li>Sample length (s): " + data.sample_length_secs + "</li>");
+			$("#results").append("<li>HR: " + (parseInt(data.num_waveforms) / parseFloat(data.sample_length_secs))*60 + "</li>");
+			$("#results").append("<li>Waves: " + data.waves + "</li>");			
 		}
               });
 		$("#results-display").text("Calculating results...")
