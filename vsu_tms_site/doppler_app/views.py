@@ -7,8 +7,19 @@ import scipy.io.wavfile
 from scipy import signal
 import numpy as np
 from datetime import datetime
-from os import getcwd
-from os.path import join, normpath
+from os.path import join, normpath, isfile
+
+from math import sqrt
+from os import listdir, getcwd
+from matplotlib import pyplot as plt
+from matplotlib import figure as fig
+from tempfile import TemporaryFile
+from PIL import Image
+from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
+from sklearn import cross_validation
+from sklearn.metrics import confusion_matrix
+import pandas as pd
 
 # Create your views here.
 def index(request):
