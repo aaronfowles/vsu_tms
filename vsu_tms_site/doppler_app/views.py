@@ -47,11 +47,11 @@ def upload_doppler(request):
     wf_grad = wf_grad / float(peak_gradient)
     # Waveform finding logic
     start_indices = []
-    amplitude_threshold = 0.2
+    amplitude_threshold = 0.4
     gradient_threshold = 0.6
-    running_lag = 0
     running_lag_threshold = 20000
     backstep_offset = 1000
+    running_lag = running_lag_threshold - backstep_offset
     for i in range(0,len(wf)):
         if (wf_normed[i] > amplitude_threshold and wf_grad[i] > gradient_threshold and running_lag >= running_lag_threshold):
             start_indices[i-backstep_offset] = 1
@@ -83,17 +83,79 @@ def upload_doppler(request):
         wf_list.append(wf[pair[0]:pair[1]])
 
     context['waves'] = []
-    for wf_wave in wf_list:
-        temp_dict = {}
-
-        temp_dict['mean'] = wf_wave.mean()
+    for wf_segment in wf_list:
+        wave_metrics = {}
+        wave_metrics['wf'] = wf_segment
+        wave_metrics['mean'] = wf_segment.mean()
         energy = 0
-        for i in range(0,len(wf_wave)-1):
-            energy += wf_wave[i]*wf_wave[i]
-        temp_dict['raw_energy'] = energy
-
-        context['waves'].append(temp_dict)
-
-    context['num_waveforms'] = num_points
+        for i in range(0,len(wf_segment)-1):
+            energy += wf_segment[i]*wf_segment[i]
+        wave_metrics['raw_energy'] = energy
+        wave_metrics['raw_power'] = energy / float(len(wf_segment))
+        wave_metrics['raw_variance'] = wf_segment.var()
+        wave_metrics['raw_RMS'] = sqrt(np.absolute(wave_metrics['raw_power']))
+        wf_segment_gradient = np.absolute(np.gradient(np.absolute(wf_segment)))
+        wave_metrics['raw_gradient_variance'] = wf_segment_gradient.var() 
+        wave_metrics['raw_gradient_mean'] = wf_segment_gradient.mean()
+        wave_metrics['raw_gradient_median'] = np.median(wf_segment_gradient)
+        wave_metrics['length_secs'] = len(wf_segment) / float(44100)
+        normalised_wf_segment = wf_segment / float(wf_segment.max())
+        wave_metrics['normalised_energy'] = energy_function(normalised_wf_segment)
+        wave_metrics['normalised_power'] = power_function(normalised_wf_segment, wave_metrics['normalised_energy'])
+        wave_metrics['normalised_variance'] = normalised_wf_segment.var()
+        wave_metrics['normalised_RMS'] = sqrt(wave_metrics['normalised_power'])
+        normalised_wf_segment_gradient = np.absolute(np.gradient(np.absolute(normalised_wf_segment)))
+        wave_metrics['normalised_gradient_variance'] = normalised_wf_segment_gradient.var() 
+        wave_metrics['normalised_gradient_mean'] = normalised_wf_segment_gradient.mean()
+        wave_metrics['normalised_gradient_median'] = np.median(normalised_wf_segment_gradient)
+        #FFT
+        T = 1 / float(sampling_frequency)
+        N = len(wf_segment)
+        x = np.linspace(0.0, 1.0/(2.0*T), N/2)
+        ft = np.fft.fft(wf_segment)
+        freq = np.fft.fftfreq(len(wf_segment),T)
+        freq = freq[freq >= 0]
+        zipped = zip(freq,20*(np.log10(np.abs(ft[0:N/2]))))
+        for i in range(0,28):
+            freq_sum = 0
+            power_sum = 0
+            for j in range(0,150):
+                freq_sum += zipped[i*150 + j][0]
+                power_sum += zipped[i*150 + j][1]
+            freq_mean = int(round(freq_sum / float(150), -2))
+            power_mean = power_sum / float(150)
+            wave_metrics[str(i)] = power_mean
+        context['waves'].append(wave_metrics)
+        
+    counter = 0
+    img_store = {}
+    final_df = pd.DataFrame()
+    for w in brachial_metric_list:
+        for k, v in w.iteritems():
+            if (k == 'wf'):
+                continue
+            final_df.loc[counter, k] = v
+        final_df.loc[counter, 'class'] = 'brachial'
+        data, freqs, bins, im = plt.specgram(w['wf'], Fs=sampling_frequency)
+        with TemporaryFile() as tmpfile:
+            plt.savefig(tmpfile,bbox_inches='tight') # File position is at the end of the file.
+            tmpfile.seek(0) # Rewind the file. (0: the beginning of the file)
+            im = Image.open(tmpfile)
+            npa = np.asarray(im) # array indexed by [y][x] where [0][0] is bottom-left corner (cartesian)
+        img_store[str(counter)] = npa[:200,:200,0]
+        # Extract specgram features and insert into dataframe
+        bands = 50
+        for band in range(0,bands):
+            lower_freq = (img_store[str(counter)].shape[0] / bands) * band
+            higher_freq = (img_store[str(counter)].shape[0] / bands) * (band+1)
+            colname = 'energy_band_' + str(band)
+            final_df.loc[counter, colname] = img_store[str(counter)][lower_freq:higher_freq,:].sum() / (img_store[str(counter)].shape[0] * (higher_freq - lower_freq))
+        counter += 1
+        
+    # UNPICKLE MODEL HERE <--------
+    X = final_df.ix[:,final_df.columns != 'class']
+    predictions = model.predict(X)
+    
+    context['predictions'] = predictions
 
     return JsonResponse(context)
