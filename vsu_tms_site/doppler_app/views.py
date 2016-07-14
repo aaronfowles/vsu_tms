@@ -163,7 +163,8 @@ def upload_doppler(request):
             final_df.loc[counter, colname] = img_store[str(counter)][lower_freq:higher_freq,:].sum() / (img_store[str(counter)].shape[0] * (higher_freq - lower_freq))
         counter += 1
         
-    # UNPICKLE MODEL HERE <--------
+    with open('classifier.pkl', 'rb') as fid:
+        model = cPickle.load(fid)
     X = final_df.ix[:,final_df.columns != 'class']
     predictions = model.predict(X)
     
