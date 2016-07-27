@@ -83,11 +83,11 @@
                 , cache: false
 		, success: function(data) {
 			$("#results-display").append("<ul id='results'></ul>")
-			var text_string = "<li>Predictions: " + data.predictions + "</li>"; 
+			var text_string = "<li>Prediction: " + data.prediction + "</li>"; 
 			$("#results").append(text_string);
-			$("#results").append("<li>Sample length (s): " + data.sample_length_secs + "</li>");
-			$("#results").append("<li>HR: " + (parseInt(data.num_waveforms) / parseFloat(data.sample_length_secs))*60 + "</li>");
-			$("#results").append("<li>Waves: " + data.waves + "</li>");			
+			//$("#results").append("<li>Sample length (s): " + data.sample_length_secs + "</li>");
+			//$("#results").append("<li>HR: " + (parseInt(data.num_waveforms) / parseFloat(data.sample_length_secs))*60 + "</li>");
+			//$("#results").append("<li>Waves: " + data.waves + "</li>");			
 		}
               });
 		$("#results-display").text("Calculating results...")

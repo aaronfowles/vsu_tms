@@ -1,0 +1,28 @@
+Traceback (most recent call last):
+  File "/home/dev/.local/share/letsencrypt/bin/letsencrypt", line 11, in <module>
+    sys.exit(main())
+  File "/home/dev/.local/share/letsencrypt/local/lib/python2.7/site-packages/letsencrypt/cli.py", line 1950, in main
+    plugins = plugins_disco.PluginsRegistry.find_all()
+  File "/home/dev/.local/share/letsencrypt/local/lib/python2.7/site-packages/letsencrypt/plugins/disco.py", line 168, in find_all
+    plugin_ep = PluginEntryPoint(entry_point)
+  File "/home/dev/.local/share/letsencrypt/local/lib/python2.7/site-packages/letsencrypt/plugins/disco.py", line 31, in __init__
+    self.plugin_cls = entry_point.load()
+  File "/home/dev/.local/share/letsencrypt/local/lib/python2.7/site-packages/pkg_resources/__init__.py", line 2202, in load
+    return self.resolve()
+  File "/home/dev/.local/share/letsencrypt/local/lib/python2.7/site-packages/pkg_resources/__init__.py", line 2208, in resolve
+    module = __import__(self.module_name, fromlist=['__name__'], level=0)
+  File "/home/dev/.local/share/letsencrypt/local/lib/python2.7/site-packages/letsencrypt_apache/configurator.py", line 22, in <module>
+    from letsencrypt_apache import augeas_configurator
+  File "/home/dev/.local/share/letsencrypt/local/lib/python2.7/site-packages/letsencrypt_apache/augeas_configurator.py", line 4, in <module>
+    import augeas
+  File "/home/dev/.local/share/letsencrypt/local/lib/python2.7/site-packages/augeas.py", line 78, in <module>
+    class Augeas(object):
+  File "/home/dev/.local/share/letsencrypt/local/lib/python2.7/site-packages/augeas.py", line 82, in Augeas
+    _libaugeas = _dlopen("augeas")
+  File "/home/dev/.local/share/letsencrypt/local/lib/python2.7/site-packages/augeas.py", line 72, in _dlopen
+    libs = [l for l in [ ctypes.util.find_library(a) for a in args ] if l]
+  File "/usr/lib/python2.7/ctypes/util.py", line 253, in find_library
+    return _findSoname_ldconfig(name) or _get_soname(_findLib_gcc(name))
+  File "/usr/lib/python2.7/ctypes/util.py", line 242, in _findSoname_ldconfig
+    f = os.popen('/sbin/ldconfig -p 2>/dev/null')
+OSError: [Errno 12] Cannot allocate memory

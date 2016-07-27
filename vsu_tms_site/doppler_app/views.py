@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.http import JsonResponse, HttpResponse
-
+import json
 from StringIO import StringIO
 import wave
 import scipy.io.wavfile
@@ -20,6 +20,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn import cross_validation
 from sklearn.metrics import confusion_matrix
 import pandas as pd
+import cPickle
 
 # Create your views here.
 def index(request):
@@ -40,6 +41,7 @@ def upload_doppler(request):
     wf = wf[:,0]
 
     # Band-pass filtering
+    sampling_frequency = 44100
     nyq = 0.5 * 44100
     cutoff = 250 / nyq
     b, a = signal.butter(4,cutoff,'highpass')
@@ -111,8 +113,11 @@ def upload_doppler(request):
         wave_metrics['raw_gradient_median'] = np.median(wf_segment_gradient)
         wave_metrics['length_secs'] = len(wf_segment) / float(44100)
         normalised_wf_segment = wf_segment / float(wf_segment.max())
-        wave_metrics['normalised_energy'] = energy_function(normalised_wf_segment)
-        wave_metrics['normalised_power'] = power_function(normalised_wf_segment, wave_metrics['normalised_energy'])
+	energy = 0
+        for i in range(0,len(normalised_wf_segment)-1):
+            energy += normalised_wf_segment[i]*normalised_wf_segment[i]
+        wave_metrics['normalised_energy'] = energy
+        wave_metrics['normalised_power'] = energy / float(len(normalised_wf_segment))
         wave_metrics['normalised_variance'] = normalised_wf_segment.var()
         wave_metrics['normalised_RMS'] = sqrt(wave_metrics['normalised_power'])
         normalised_wf_segment_gradient = np.absolute(np.gradient(np.absolute(normalised_wf_segment)))
@@ -141,7 +146,7 @@ def upload_doppler(request):
     counter = 0
     img_store = {}
     final_df = pd.DataFrame()
-    for w in brachial_metric_list:
+    for w in context['waves']:
         for k, v in w.iteritems():
             if (k == 'wf'):
                 continue
@@ -163,11 +168,21 @@ def upload_doppler(request):
             final_df.loc[counter, colname] = img_store[str(counter)][lower_freq:higher_freq,:].sum() / (img_store[str(counter)].shape[0] * (higher_freq - lower_freq))
         counter += 1
         
-    with open('classifier.pkl', 'rb') as fid:
+    mod_path = join(getcwd(),'doppler_app','classifier.pkl')
+    with open(mod_path, 'rb') as fid:
         model = cPickle.load(fid)
     X = final_df.ix[:,final_df.columns != 'class']
     predictions = model.predict(X)
-    
-    context['predictions'] = predictions
-
+    convert_dict = {'brachial':0.0,'carotid':1.0}
+    running_total = 0.0
+    for p in predictions:
+	running_total += float(convert_dict[str(p)])
+    context = {}
+    prediction_float = running_total / float(len(predictions))
+    prediction = ''
+    if (prediction_float > 0.5):
+        prediction = 'Carotid'
+    else:
+        prediction = 'Brachial'
+    context['prediction'] = prediction
     return JsonResponse(context)
