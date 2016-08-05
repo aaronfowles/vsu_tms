@@ -184,5 +184,5 @@ def upload_doppler(request):
         prediction = 'Carotid'
     else:
         prediction = 'Brachial'
-    context['prediction'] = prediction
+    context['prediction'] = prediction_float
     return JsonResponse(context)

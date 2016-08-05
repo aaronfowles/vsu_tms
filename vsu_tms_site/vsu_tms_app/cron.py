@@ -6,7 +6,7 @@ import requests
 if __name__=='__main__':
     client = requests.session()
 
-    host = 'http://178.62.111.80'
+    host = 'http://vsu.website'
     port = ':80/app/'
     
     app_url = host + port + 'login/'
