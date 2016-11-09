@@ -172,17 +172,19 @@ def upload_doppler(request):
     with open(mod_path, 'rb') as fid:
         model = cPickle.load(fid)
     X = final_df.ix[:,final_df.columns != 'class']
-    predictions = model.predict(X)
+    predictions = list(model.predict(X))
     convert_dict = {'brachial':0.0,'carotid':1.0}
     running_total = 0.0
+    prediction = ''
     for p in predictions:
 	running_total += float(convert_dict[str(p)])
+        prediction += str(p)
+        prediction += ', '
     context = {}
     prediction_float = running_total / float(len(predictions))
-    prediction = ''
-    if (prediction_float > 0.5):
-        prediction = 'Carotid'
-    else:
-        prediction = 'Brachial'
-    context['prediction'] = prediction_float
+    #if (prediction_float > 0.5):
+    #    prediction = 'Carotid'
+    #else:
+    #    prediction = 'Brachial'
+    context['prediction'] = prediction
     return JsonResponse(context)

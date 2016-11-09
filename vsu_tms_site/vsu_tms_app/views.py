@@ -46,12 +46,13 @@ def user_register(req):
 def send_registration_request(req):
     context = {}
     SERVER = "localhost"
-    FROM = "admin@vsu.tms"
+    FROM = "admin@vsu.website"
     TO = ['aaronfowles@gmail.com']
     message = 'Username - ' + req.POST['InputName'] + "\r"
     message += 'Email - ' + req.POST['InputEmail'] + "\r"
     message += 'Reason - ' + req.POST['InputMessage'] + "\r"
     server = smtplib.SMTP(SERVER)
+    server.login('dev','EPIPhone86')
     server.sendmail(FROM,TO,message)
     server.quit()
     context['message'] = 'Thank you, your request has been received. Someone will be in touch as soon as possible.'
